@@ -17,9 +17,9 @@ $ErrorActionPreference = 'Stop'
 mkdir dist
 
 $env:GOARCH = $platform
-go build -C ..\..\ -o .\build\windows\dist\cli-$version-windows-$architecture.exe -ldflags "-X main.version=$version"
+go build -C ..\..\ -o .\build\windows\dist\cli-$version-windows-$platform.exe -ldflags "-X main.version=$version"
 
-Copy-Item .\dist\cli-$version-windows-$architecture.exe .\bin\spicetify.exe
+Copy-Item .\dist\cli-$version-windows-$platform.exe .\bin\spicetify.exe
 
 $arch = $platform -replace 'amd64', 'x64' -replace '386', 'x86'
 wix build -arch $arch -d ProductVersion=$version -d Platform=$arch -ext WixToolset.Util.wixext -ext WixToolset.UI.wixext .\installer.wxs -o .\dist\installer-$version-windows-$platform.msi
