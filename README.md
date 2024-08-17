@@ -15,16 +15,22 @@ Note: On **Windows**, only use `pwsh` as shell! (not `cmd`, not `powershell`)
 
 ### Part 1: Installation
 
+#### For Users:
+
+Either pick the latest installer for your platform from the [releases](https://github.com/Delusoire/cli/releases) or run the [install.ps1](install.ps1) script
+
+#### For Developers:
+
 0. First and foremost install the build dependencies:
    [Git](https://git-scm.com/downloads) and [Go](https://go.dev/doc/install)
 1. Clone this repo: `git clone github.com/spicetify/cli -b next && cd cli`
-2. Run `go build`, this will create a new `spicetify` executable in the working
-   directory
-3. Run `./spicetify init` to initialize the spicetify setup, this only needs to
-   be done once. If the command fails, try running it in an elevated shell (as
-   Administrator)
-4. [optional] Add the `spicetify` executable to your PATH variable for ease of
-   access.
+2. Run `go build`, this will create a new `spicetify` executable in the working directory
+3. This executable assumes a portable setup: <folder>/bin/spicetify[.exe]. Make
+   sure to place the executable accordingly; the name of the first folder doesn't matter
+4. Run `<path/to/folder>/bin/spicetify init` to initialize the spicetify setup,
+   this only needs to be done once. If the command fails, try running it in an elevated shell
+   (as Administrator)
+5. [optional] Add the `<path/to/folder>/bin` path to your PATH environment variable for ease of access.
    - On **Windows**, run the following in pwsh:
      ```pwsh
      $user = [EnvironmentVariableTarget]::User
@@ -36,8 +42,7 @@ Note: On **Windows**, only use `pwsh` as shell! (not `cmd`, not `powershell`)
      ```zsh
      echo "$HOME/Library/Application Support/spicetify/bin" >> /etc/paths
      ```
-   - On other platforms, you can perform a simple search on how to set the PATH
-     environment variable
+   - On other platforms, you can perform a simple search on how to set the PATH environment variable
 
 ### Part 2: Patching
 
@@ -47,25 +52,11 @@ Note: On **Windows**, only use `pwsh` as shell! (not `cmd`, not `powershell`)
    done when using spicetify for the first time or when the Spotify client
    updates (and reverts all the patches).
 
-You can always revert this by running `spicetify fix`.
+You can always revert `spicetify apply` by running `spicetify fix`.
 
 ### Part 3: Managing modules
 
-You can further improve your experience by installing modules:
-
-```sh
-spicetify pkg install stdlib@0.2.2 https://github.com/spicetify/modules/releases/download/2024-07-18/stdlib@0.2.2+sp-1.2.40-cm-1906ea8d2e9.zip
-spicetify pkg install palette-manager@0.2.1 https://github.com/spicetify/modules/releases/download/2024-07-18/palette-manager@0.2.1+sp-1.2.40-cm-1906ea8d2e9.zip
-spicetify pkg install Delusoire.marketplace@0.1.3 https://github.com/Delusoire/bespoke-modules/releases/download/2024-07-18/Delusoire.marketplace@0.1.3+sp-1.2.40-cm-1906ea8d2e9.zip
-```
-
-And enabling them:
-
-```sh
-spicetify pkg enable stdlib@0.2.2
-spicetify pkg enable palette-manager@0.2.1
-spicetify pkg enable Delusoire.marketplace@0.1.3
-```
+Moved to: https://github.com/Delusoire/bespoke-modules
 
 ## Caveats
 
@@ -75,8 +66,9 @@ creating a `config.yaml` file and adding a
 `spotify-data-path: path/to/spotify/data/` (and optionally a
 `spotify-config-path: path/to/spotify/config/` for more advanced dev workflows)
 Furthermore, if the Spotify folder is Frozen (like the Microsoft Store version
-of Spotify), you must tell spicetify to use mirror mode. For the Microsoft Store
-version of Spotify, this would be enough:
+of Spotify), you must tell spicetify to use mirror mode.
+
+For the Microsoft Store version of Spotify, this would be enough:
 
 ```
 $configPath = "$env:LOCALAPPDATA\spicetify\config.yaml"
@@ -100,3 +92,9 @@ GPLv3. See [COPYING](COPYING).
 `spicetify update on|off`
 
 // TODO
+
+## Other resources
+
+https://github.com/spicetify/hooks
+
+https://github.com/spicetify/modules
