@@ -12,7 +12,7 @@ $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 #region Variables
-$spicetifyFolderPath = "$env:LOCALAPPDATA\spicetify"
+$spicetifyFolderPath = "$env:LOCALAPPDATA\Spicetify"
 $spicetifyExecutablePath = "$spicetifyFolderPath\bin\spicetify.exe"
 #endregion Variables
 
@@ -99,7 +99,7 @@ function Get-Binary {
 		}
 		else {
 			Write-Host -Object 'Fetching the latest Spicetify version...' -NoNewline
-			$latestRelease = Invoke-RestMethod -Uri 'https://api.github.com/repos/spicetify/cli/releases/latest'
+			$latestRelease = Invoke-RestMethod -Uri 'https://api.github.com/repos/Delusoire/cli/releases/latest'
 			$targetVersion = $latestRelease.tag_name
 			Write-Ok
 		}
