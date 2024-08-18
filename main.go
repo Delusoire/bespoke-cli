@@ -6,7 +6,7 @@
 package main
 
 import (
-	"github.com/Delusoire/bespoke-cli/cmd"
+	"github.com/Delusoire/bespoke-cli/v3/cmd"
 )
 
 func main() {

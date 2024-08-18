@@ -10,7 +10,7 @@ package paths
 import (
 	"path/filepath"
 
-	e "github.com/Delusoire/bespoke-cli/errors"
+	e "github.com/Delusoire/bespoke-cli/v3/errors"
 
 	"github.com/adrg/xdg"
 )

@@ -8,7 +8,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/Delusoire/bespoke-cli/module"
+	"github.com/Delusoire/bespoke-cli/v3/module"
 
 	"github.com/spf13/cobra"
 )

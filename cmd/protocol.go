@@ -12,9 +12,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/Delusoire/bespoke-cli/module"
+	"github.com/Delusoire/bespoke-cli/v3/module"
 
-	e "github.com/Delusoire/bespoke-cli/errors"
+	e "github.com/Delusoire/bespoke-cli/v3/errors"
 
 	"github.com/spf13/cobra"
 )

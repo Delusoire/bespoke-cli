@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Delusoire/bespoke-cli/paths"
+	"github.com/Delusoire/bespoke-cli/v3/paths"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

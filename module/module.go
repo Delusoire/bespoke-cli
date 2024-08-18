@@ -16,9 +16,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/Delusoire/bespoke-cli/archive"
-	"github.com/Delusoire/bespoke-cli/link"
-	"github.com/Delusoire/bespoke-cli/paths"
+	"github.com/Delusoire/bespoke-cli/v3/archive"
+	"github.com/Delusoire/bespoke-cli/v3/link"
+	"github.com/Delusoire/bespoke-cli/v3/paths"
 
 	bufra "github.com/avvmoto/buf-readerat"
 	"github.com/snabb/httpreaderat"

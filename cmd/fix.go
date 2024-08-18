@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/Delusoire/bespoke-cli/paths"
+	"github.com/Delusoire/bespoke-cli/v3/paths"
 
 	"github.com/spf13/cobra"
 )
