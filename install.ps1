@@ -3,9 +3,34 @@ param (
 	[Parameter(
 		Mandatory = $false,
 		Position = 0,
-		HelpMessage = "Specify the version of Spicetify to install (format: x.y.z). If not specified, the latest version will be installed."
+		HelpMessage = "Specify the version of Spicetify to install (format: 1.2.3). If not specified, the latest version will be installed."
 	)]
-	[string]$v
+	[string]$v,
+	[Parameter(
+		Mandatory = $false,
+		HelpMessage = "Specify the path to the Spicetify folder."
+	)]
+	[string]$spicetifyFolderPath = "$env:LOCALAPPDATA\Spicetify",
+	[Parameter(
+		Mandatory = $false,
+		HelpMessage = "Install Spicetify in portable mode. Storing the configuration within <spicetifyFolderPath>\config."
+	)]
+	[switch]$portable = $false,
+	[Parameter(
+		Mandatory = $false,
+		HelpMessage = "Skip installing the binary."
+	)]
+	[switch]$skipBinary = $false,
+	[Parameter(
+		Mandatory = $false,
+		HelpMessage = "Skip initializing the daemon."
+	)]
+	[switch]$skipDaemon = $false,
+	[Parameter(
+		Mandatory = $false,
+		HelpMessage = "Skip registering the URI scheme."
+	)]
+	[switch]$skipURIScheme = $false
 )
 
 $ErrorActionPreference = 'Stop'
@@ -13,8 +38,9 @@ $ErrorActionPreference = 'Stop'
 
 #region Variables
 $cliOwnerRepo = "Delusoire/bespoke-cli"
-$spicetifyFolderPath = "$env:LOCALAPPDATA\Spicetify"
-$spicetifyExecutablePath = "$spicetifyFolderPath\bin\spicetify.exe"
+
+$spicetifyPortableBinaryPath = "$spicetifyFolderPath\bin"
+$spicetifyPortableExecutablePath = "$spicetifyPortableBinaryPath\spicetify.exe"
 #endregion Variables
 
 #region Functions
@@ -75,7 +101,7 @@ function Add-Folder {
 	}
 }
 
-function Get-Binary {
+function Receive-Binary {
 	[CmdletBinding()]
 	param ()
 	begin {
@@ -121,7 +147,7 @@ function Get-Binary {
 	}
 }
 
-function Add-SpicetifyToPath {
+function Add-BinToPath {
 	[CmdletBinding()]
 	param ()
 	begin {
@@ -130,8 +156,8 @@ function Add-SpicetifyToPath {
 		$path = [Environment]::GetEnvironmentVariable('PATH', $user)
 	}
 	process {
-		if ($path -notlike "*$spicetifyFolderPath*") {
-			$path = "$path;$spicetifyFolderPath"
+		if ($path -notlike "*$spicetifyPortableBinaryPath*") {
+			$path = "$path;$spicetifyPortableBinaryPath"
 		}
 	}
 	end {
@@ -149,12 +175,19 @@ function Install-Binary {
 		Add-Folder
 	}
 	process {
-		$spicetifyBinaryPath = Get-Binary
+		$downloadedBinaryPath = Receive-Binary
 		Write-Host -Object 'Extracting Spicetify...' -NoNewline
-		New-Item -Path "$spicetifyFolderPath\bin" -ItemType 'Directory' -Force
-		Move-Item -Path $spicetifyBinaryPath -DestinationPath "$spicetifyFolderPath\bin" -Force
+		New-Item -Path $spicetifyPortableBinaryPath -ItemType 'Directory' -Force
+		Move-Item -Path $downloadedBinaryPath -DestinationPath $spicetifyPortableBinaryPath -Force
 		Write-Ok
-		Add-SpicetifyToPath
+		Add-BinToPath
+		if ($portable) {
+			Write-Host -Object 'Creating Spicetify portable config folder...' -NoNewline
+			$spicetifyPortableConfigPath = "$spicetifyFolderPath\config"
+			New-Item -Path $spicetifyPortableConfigPath -ItemType 'Directory' -Force
+			Write-Ok
+		}
+		& $spicetifyPortableExecutablePath 'init'
 	}
 	end {
 		Write-Host -Object 'Spicetify was successfully installed!' -ForegroundColor 'Green'
@@ -171,7 +204,7 @@ function Initialize-Daemon {
 		$initTask = {
 			$taskName = "Spicetify daemon"
 			$description = "Launches Spicetify daemon at startup"
-			$command = $spicetifyExecutablePath
+			$command = $spicetifyPortableExecutablePath
 			$arguments = "daemon"
 
 			$action = New-ScheduledTaskAction -Execute $command -Argument $arguments
@@ -210,7 +243,7 @@ function Register-URIScheme {
 	}
 	process {
 		$scheme = "spicetify"
-		$command = "`"$spicetifyExecutablePath`" protocol `"%1`""
+		$command = "`"$spicetifyPortableExecutablePath`" protocol `"%1`""
 
 		$K = New-Item -Path "HKCU:\Software\Classes\$scheme" -Force
 		$K.SetValue("", "URL:$scheme Protocol", [Microsoft.Win32.RegistryValueKind]::String)
@@ -260,9 +293,16 @@ else {
 #endregion Checks
 
 #region Spicetify
-Install-Binary
-Initialize-Daemon
-Register-URIScheme
+if (-not $skipBinary) {
+	Install-Binary
+}
+if (-not $skipDaemon) {
+	Initialize-Daemon
+}
+if (-not $skipURIScheme) {
+	Register-URIScheme
+}
+
 Write-Host -Object "`nRun" -NoNewline
 Write-Host -Object ' spicetify -h ' -NoNewline -ForegroundColor 'Cyan'
 Write-Host -Object 'to get started'
