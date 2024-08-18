@@ -53,7 +53,6 @@ func (v *Vault) setModule(identifier ModuleIdentifier, module *Module) {
 }
 
 func (v *Vault) getEnabledStore(identifier ModuleIdentifier) (*Store, bool) {
-	module := Store{}
 	versions := v.getModule(identifier)
 	module, ok := versions.V[versions.Enabled]
 	return &module, ok
