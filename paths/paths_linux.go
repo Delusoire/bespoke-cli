@@ -10,7 +10,7 @@ package paths
 import (
 	"path/filepath"
 
-	e "spicetify/errors"
+	e "github.com/spicetify/cli/errors"
 
 	"github.com/adrg/xdg"
 )

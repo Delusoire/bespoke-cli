@@ -9,7 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"spicetify/paths"
+	"github.com/spicetify/cli/paths"
 
 	"github.com/spf13/cobra"
 )

@@ -10,10 +10,11 @@ import (
 	"net/url"
 	"os/exec"
 	"runtime"
-	"spicetify/module"
 	"strings"
 
-	e "spicetify/errors"
+	"github.com/spicetify/cli/module"
+
+	e "github.com/spicetify/cli/errors"
 
 	"github.com/spf13/cobra"
 )

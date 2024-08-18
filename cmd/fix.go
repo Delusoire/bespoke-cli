@@ -9,8 +9,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"spicetify/paths"
 	"strings"
+
+	"github.com/spicetify/cli/paths"
 
 	"github.com/spf13/cobra"
 )

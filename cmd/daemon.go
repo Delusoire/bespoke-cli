@@ -14,8 +14,9 @@ import (
 	"net/http/cookiejar"
 	"net/http/httputil"
 	"net/url"
-	"spicetify/paths"
 	"strings"
+
+	"github.com/spicetify/cli/paths"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"

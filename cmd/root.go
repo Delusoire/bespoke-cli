@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"spicetify/paths"
+	"github.com/spicetify/cli/paths"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

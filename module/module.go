@@ -14,10 +14,11 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"spicetify/archive"
-	"spicetify/link"
-	"spicetify/paths"
 	"strings"
+
+	"github.com/spicetify/cli/archive"
+	"github.com/spicetify/cli/link"
+	"github.com/spicetify/cli/paths"
 
 	bufra "github.com/avvmoto/buf-readerat"
 	"github.com/snabb/httpreaderat"

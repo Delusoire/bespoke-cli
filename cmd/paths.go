@@ -7,7 +7,8 @@ package cmd
 
 import (
 	"fmt"
-	"spicetify/paths"
+
+	"github.com/spicetify/cli/paths"
 
 	"github.com/spf13/cobra"
 )

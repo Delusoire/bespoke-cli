@@ -9,8 +9,9 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
-	"spicetify/archive"
-	"spicetify/paths"
+
+	"github.com/spicetify/cli/archive"
+	"github.com/spicetify/cli/paths"
 
 	"github.com/spf13/cobra"
 )
