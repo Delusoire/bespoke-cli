@@ -1,4 +1,4 @@
-module github.com/Delusoire/bespoke-cli
+module github.com/Delusoire/bespoke-cli/v3
 
 go 1.22.2
 
