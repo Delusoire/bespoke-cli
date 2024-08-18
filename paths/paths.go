@@ -16,14 +16,26 @@ var (
 )
 
 func GetDefaultSpicetifyConfigPath() string {
+	// <portableAppPath>/
+	// ├─ bin/
+	// │  ├─ <realExe>
+	// ├─ config/
+
+	// <portableAppPath> should case-insensitively match "**/spicetify*"
 	if exe, err := os.Executable(); err == nil {
 		if realExe, err := filepath.EvalSymlinks(exe); err == nil {
 			portableBinPath := filepath.Dir(realExe)
-			portablePath := filepath.Dir(portableBinPath)
-			portableBinDir := strings.ToLower(filepath.Base(portablePath))
-			portableDir := strings.ToLower(filepath.Base(portablePath))
-			if portableDir == "spicetify" && portableBinDir == "bin" {
-				return portablePath
+			portableAppPath := filepath.Dir(portableBinPath)
+
+			portableBinDir := filepath.Base(portableAppPath)
+			portableAppDir := strings.ToLower(filepath.Base(portableAppPath))
+
+			if strings.HasPrefix(portableAppDir, "spicetify") && portableBinDir == "bin" {
+				portableConfigPath := filepath.Join(portableAppPath, "config")
+
+				if EnsurePath(portableConfigPath) {
+					return portableConfigPath
+				}
 			}
 		}
 	}
