@@ -54,6 +54,7 @@ Either pick the latest installer for your platform from the [releases](https://g
       ```
    This only needs to be done once. If the command fails, try running it in an elevated shell (as Administrator)
 
+// TODO: register uri scheme and daemon/task. 
 
 ### Part 2: Patching
 
