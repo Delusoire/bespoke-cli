@@ -22,38 +22,51 @@ Either pick the latest installer for your platform from the [releases](https://g
 
 0. First and foremost install the build dependencies:
    [Git](https://git-scm.com/downloads) and [Go](https://go.dev/doc/install)
-1. Clone this repo: `git clone github.com/spicetify/cli -b next && cd cli`
+1. Clone this repo: `git clone github.com/Delusoire/bespoke-cli && cd cli`
 2. Run `go build`, this will create a new `spicetify` executable in the working directory
-3. This executable assumes a portable setup:
+3. This executable assumes a portable setup if the following structure is respected:
       ```
       <folder>/
       ├─ bin/
       │  ├─ spicetify[.exe]
+      ├─ config/
       ```
-   Make sure to place the executable accordingly; the name (and location) of the first folder doesn't matter
+   the name (and location) of the first folder doesn't matter
 4. [optional] Add the `<path/to/folder>/bin` path to your PATH environment variable for ease of access.
    - On **Windows**, run the following in pwsh:
         ```pwsh
         $user = [EnvironmentVariableTarget]::User
         $path = [Environment]::GetEnvironmentVariable('PATH', $user)
-        $path = "$path;$env:LOCALAPPDATA\spicetify\bin"
+        $path = "$path;$env:LOCALAPPDATA\Spicetify\bin"
         [Environment]::SetEnvironmentVariable('PATH', $path, $user)
         ```
    - On a default **macOS** installation, run the following:
         ```zsh
-        echo "$HOME/Library/Application Support/spicetify/bin" >> /etc/paths
+        echo "$HOME/Library/Application Support/Spicetify/bin" >> /etc/paths
         ```
    - On other platforms, you can perform a simple search on how to set the PATH environment variable
 5. Run `<path/to/folder>/bin/spicetify init` to initialize the Spicetify setup,
    It should create the following entries:
       ```
+      $XDG_CONFIG_HOME/
+      ├─ (S|s)picetify/
+      │  ├─ modules/
+      │  │  ├─ vault.json
+      │  ├─ config.yaml
+      ```
+   or if ran in a portable structure:
+      ```
       <folder>/
-      ├─ modules/
-      │  ├─ vault.json
-      ├─ config.yaml
+      ├─ bin/
+      │  ├─ spicetify[.exe]
+      ├─ config/
+      │  ├─ modules/
+      │  │  ├─ vault.json
+      │  ├─ config.yaml
       ```
    This only needs to be done once. If the command fails, try running it in an elevated shell (as Administrator)
 
+// TODO: register uri scheme and daemon/task. 
 
 ### Part 2: Patching
 
