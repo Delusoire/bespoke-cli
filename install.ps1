@@ -9,9 +9,9 @@ param (
 
 	[Parameter(
 		ParameterSetName = 'Install',
-		HelpMessage = 'Specify the path to the Spicetify folder. default: "$env:LOCALAPPDATA\Spicetify"'
+		HelpMessage = 'Specify the path to the Spicetify folder. default: "$env:LOCALAPPDATA\Spicetify\"'
 	)]
-	[string]$spicetifyFolderPath = "$env:LOCALAPPDATA\Spicetify",
+	[string]$spicetifyFolderPath = "$env:LOCALAPPDATA\Spicetify\",
 
 	[Parameter(
 		ParameterSetName = 'Initialize',
@@ -38,7 +38,7 @@ param (
 
 	[Parameter(
 		ParameterSetName = 'Install',
-		HelpMessage = 'Install Spicetify in portable mode. Storing the configuration within <spicetifyFolderPath>\config.'
+		HelpMessage = 'Install Spicetify in portable mode. Storing the configuration within $spicetifyFolderPath\config\.'
 	)]
 	[switch]$portable = $false
 )
@@ -50,7 +50,7 @@ $ErrorActionPreference = 'Stop'
 if ($PSCmdlet.ParameterSetName -eq 'Install') {
 	$cliOwnerRepo = "Delusoire/bespoke-cli"
 
-	$spicetifyBinaryPath = "$spicetifyFolderPath\bin"
+	$spicetifyBinaryPath = "$spicetifyFolderPath\bin\"
 }
 #endregion Variables
 
@@ -189,7 +189,7 @@ function Install-Binary {
 		Add-BinToPath
 		if ($portable) {
 			Write-Host -Object 'Creating Spicetify portable config folder...' -NoNewline
-			$spicetifyPortableConfigPath = "$spicetifyFolderPath\config"
+			$spicetifyPortableConfigPath = "$spicetifyFolderPath\config\"
 			New-Item -Path $spicetifyPortableConfigPath -ItemType 'Directory' -Force
 			Write-Ok
 		}
