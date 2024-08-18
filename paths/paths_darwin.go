@@ -8,12 +8,24 @@
 package paths
 
 import (
-	"os"
 	"path/filepath"
+	e "spicetify/errors"
+
+	"github.com/adrg/xdg"
 )
 
 func GetPlatformSpotifyDataPath() (string, error) {
-	return "/Applications/Spotify.app/Contents/Resources", nil
+	spotifyAppResourcesPath := "Spotify.app/Contents/Resources"
+	spotifyAppLocations := append([]string{"/Applications"}, ResolveHomePaths("Applications")...)
+
+	for _, spotifyAppLocation := range spotifyAppLocations {
+		spotifyDataPath := filepath.Join(spotifyAppLocation, spotifyAppResourcesPath)
+		if EnsurePath(spotifyDataPath) {
+			return spotifyDataPath, nil
+		}
+	}
+
+	return "", e.ErrPathNotFound
 }
 
 func GetPlatformSpotifyExecPath(spotifyPath string) string {
@@ -21,9 +33,15 @@ func GetPlatformSpotifyExecPath(spotifyPath string) string {
 }
 
 func GetPlatformSpotifyConfigPath() (string, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
+	spotifyConfigPath := filepath.Join(xdg.ConfigHome, "Spotify")
+
+	if EnsurePath(spotifyConfigPath) {
+		return spotifyConfigPath, nil
 	}
-	return filepath.Join(home, "Library/Application Support/Spotify"), nil
+
+	return "", e.ErrPathNotFound
+}
+
+func GetPlatformSpicetifyConfigPath() string {
+	return filepath.Join(xdg.ConfigHome, "Spicetify")
 }

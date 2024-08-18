@@ -24,3 +24,7 @@ func GetPlatformSpotifyExecPath(spotifyDataPath string) string {
 func GetPlatformSpotifyConfigPath() (string, error) {
 	return filepath.Join(xdg.ConfigHome, "Spotify"), nil
 }
+
+func GetPlatformSpicetifyConfigPath() string {
+	return filepath.Join(xdg.ConfigHome, "Spicetify")
+}
