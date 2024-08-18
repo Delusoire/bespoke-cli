@@ -1,49 +1,61 @@
-[CmdletBinding()]
+[CmdletBinding(DefaultParameterSetName = 'Install')]
 param (
 	[Parameter(
-		Mandatory = $false,
-		Position = 0,
-		HelpMessage = "Specify the version of Spicetify to install (format: 1.2.3). If not specified, the latest version will be installed."
+		ParameterSetName = 'Install',
+		HelpMessage = 'Specify the version of Spicetify to install (format: 1.2.3). If not specified, the latest version will be installed.'
 	)]
+	[ValidatePattern('^\d+\.\d+\.\d+$')]
 	[string]$v,
+
 	[Parameter(
-		Mandatory = $false,
-		HelpMessage = "Specify the path to the Spicetify folder."
+		ParameterSetName = 'Install',
+		HelpMessage = 'Specify the path to the Spicetify folder. default: "$env:LOCALAPPDATA\Spicetify"'
 	)]
 	[string]$spicetifyFolderPath = "$env:LOCALAPPDATA\Spicetify",
+
 	[Parameter(
-		Mandatory = $false,
-		HelpMessage = "Install Spicetify in portable mode. Storing the configuration within <spicetifyFolderPath>\config."
+		ParameterSetName = 'Initialize',
+		HelpMessage = 'Specify the path to the Spicetify executable. default: "$env:LOCALAPPDATA\Spicetify\bin\spicetify.exe"'
 	)]
-	[switch]$portable = $false,
+	[string]$spicetifyExecutablePath = "$env:LOCALAPPDATA\Spicetify\bin\spicetify.exe",
+
 	[Parameter(
-		Mandatory = $false,
-		HelpMessage = "Skip installing the binary."
+		ParameterSetName = 'Initialize',
+		Mandatory = $true,
+		HelpMessage = 'Skip installing the binary.'
 	)]
 	[switch]$skipBinary = $false,
+
 	[Parameter(
-		Mandatory = $false,
-		HelpMessage = "Skip initializing the daemon."
+		HelpMessage = 'Skip initializing the daemon.'
 	)]
 	[switch]$skipDaemon = $false,
+
 	[Parameter(
-		Mandatory = $false,
-		HelpMessage = "Skip registering the URI scheme."
+		HelpMessage = 'Skip registering the URI scheme.'
 	)]
-	[switch]$skipURIScheme = $false
+	[switch]$skipURIScheme = $false,
+
+	[Parameter(
+		ParameterSetName = 'Install',
+		HelpMessage = 'Install Spicetify in portable mode. Storing the configuration within <spicetifyFolderPath>\config.'
+	)]
+	[switch]$portable = $false
 )
 
 $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 #region Variables
-$cliOwnerRepo = "Delusoire/bespoke-cli"
+if ($PSCmdlet.ParameterSetName -eq 'Install') {
+	$cliOwnerRepo = "Delusoire/bespoke-cli"
 
-$spicetifyPortableBinaryPath = "$spicetifyFolderPath\bin"
-$spicetifyPortableExecutablePath = "$spicetifyPortableBinaryPath\spicetify.exe"
+	$spicetifyBinaryPath = "$spicetifyFolderPath\bin"
+}
 #endregion Variables
 
 #region Functions
+#region Utilities
 function Write-Ok {
 	[CmdletBinding()]
 	param ()
@@ -83,6 +95,7 @@ function Test-PowerShellVersion {
 		$PSVersionTable.PSVersion -ge $PSMinVersion
 	}
 }
+#endregion Utilities
 
 function Add-Folder {
 	[CmdletBinding()]
@@ -115,14 +128,7 @@ function Receive-Binary {
 			$architecture = '386'
 		}
 		if ($v) {
-			if ($v -match '^\d+\.\d+\.\d+$') {
-				$targetVersion = "v$v"
-			}
-			else {
-				Write-Warning -Message "You have spicefied an invalid Spicetify version: $v `nThe version must be in the following format: 1.2.3"
-				Pause
-				exit
-			}
+			$targetVersion = "v$v"
 		}
 		else {
 			Write-Host -Object 'Fetching the latest Spicetify version...' -NoNewline
@@ -156,8 +162,8 @@ function Add-BinToPath {
 		$path = [Environment]::GetEnvironmentVariable('PATH', $user)
 	}
 	process {
-		if ($path -notlike "*$spicetifyPortableBinaryPath*") {
-			$path = "$path;$spicetifyPortableBinaryPath"
+		if ($path -notlike "*$spicetifyBinaryPath*") {
+			$path = "$path;$spicetifyBinaryPath"
 		}
 	}
 	end {
@@ -177,8 +183,8 @@ function Install-Binary {
 	process {
 		$downloadedBinaryPath = Receive-Binary
 		Write-Host -Object 'Extracting Spicetify...' -NoNewline
-		New-Item -Path $spicetifyPortableBinaryPath -ItemType 'Directory' -Force
-		Move-Item -Path $downloadedBinaryPath -DestinationPath $spicetifyPortableBinaryPath -Force
+		New-Item -Path $spicetifyBinaryPath -ItemType 'Directory' -Force
+		Move-Item -Path $downloadedBinaryPath -DestinationPath $spicetifyExecutablePath -Force
 		Write-Ok
 		Add-BinToPath
 		if ($portable) {
@@ -187,7 +193,7 @@ function Install-Binary {
 			New-Item -Path $spicetifyPortableConfigPath -ItemType 'Directory' -Force
 			Write-Ok
 		}
-		& $spicetifyPortableExecutablePath 'init'
+		& $spicetifyExecutablePath 'init'
 	}
 	end {
 		Write-Host -Object 'Spicetify was successfully installed!' -ForegroundColor 'Green'
@@ -198,13 +204,13 @@ function Initialize-Daemon {
 	[CmdletBinding()]
 	param ()
 	begin {
-		Write-Host -Object 'Creating Spicetify daemon task...' -NoNewline
+		Write-Host -Object 'Creating Spicetify daemon task...'
 	}
 	process {
 		$initTask = {
 			$taskName = "Spicetify daemon"
 			$description = "Launches Spicetify daemon at startup"
-			$command = $spicetifyPortableExecutablePath
+			$command = $spicetifyExecutablePath
 			$arguments = "daemon"
 
 			$action = New-ScheduledTaskAction -Execute $command -Argument $arguments
@@ -243,7 +249,7 @@ function Register-URIScheme {
 	}
 	process {
 		$scheme = "spicetify"
-		$command = "`"$spicetifyPortableExecutablePath`" protocol `"%1`""
+		$command = "`"$spicetifyExecutablePath`" protocol `"%1`""
 
 		$K = New-Item -Path "HKCU:\Software\Classes\$scheme" -Force
 		$K.SetValue("", "URL:$scheme Protocol", [Microsoft.Win32.RegistryValueKind]::String)
