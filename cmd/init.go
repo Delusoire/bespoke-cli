@@ -10,8 +10,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/spicetify/cli/module"
-	"github.com/spicetify/cli/paths"
+	"github.com/Delusoire/bespoke-cli/module"
+	"github.com/Delusoire/bespoke-cli/paths"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

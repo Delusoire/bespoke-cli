@@ -16,9 +16,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/spicetify/cli/archive"
-	"github.com/spicetify/cli/link"
-	"github.com/spicetify/cli/paths"
+	"github.com/Delusoire/bespoke-cli/archive"
+	"github.com/Delusoire/bespoke-cli/link"
+	"github.com/Delusoire/bespoke-cli/paths"
 
 	bufra "github.com/avvmoto/buf-readerat"
 	"github.com/snabb/httpreaderat"

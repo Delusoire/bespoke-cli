@@ -6,7 +6,7 @@
 package main
 
 import (
-	"github.com/spicetify/cli/cmd"
+	"github.com/Delusoire/bespoke-cli/cmd"
 )
 
 func main() {

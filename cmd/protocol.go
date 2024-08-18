@@ -12,9 +12,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/spicetify/cli/module"
+	"github.com/Delusoire/bespoke-cli/module"
 
-	e "github.com/spicetify/cli/errors"
+	e "github.com/Delusoire/bespoke-cli/errors"
 
 	"github.com/spf13/cobra"
 )

@@ -16,7 +16,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/spicetify/cli/paths"
+	"github.com/Delusoire/bespoke-cli/paths"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"

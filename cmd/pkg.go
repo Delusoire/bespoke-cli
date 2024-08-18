@@ -8,7 +8,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spicetify/cli/module"
+	"github.com/Delusoire/bespoke-cli/module"
 
 	"github.com/spf13/cobra"
 )
