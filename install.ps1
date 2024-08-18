@@ -12,6 +12,7 @@ $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 #region Variables
+$cliOwnerRepo = "Delusoire/bespoke-cli"
 $spicetifyFolderPath = "$env:LOCALAPPDATA\Spicetify"
 $spicetifyExecutablePath = "$spicetifyFolderPath\bin\spicetify.exe"
 #endregion Variables
@@ -99,16 +100,16 @@ function Get-Binary {
 		}
 		else {
 			Write-Host -Object 'Fetching the latest Spicetify version...' -NoNewline
-			$latestRelease = Invoke-RestMethod -Uri 'https://api.github.com/repos/Delusoire/cli/releases/latest'
+			$latestRelease = Invoke-RestMethod -Uri "https://api.github.com/repos/$cliOwnerRepo/releases/latest"
 			$targetVersion = $latestRelease.tag_name
 			Write-Ok
 		}
 		$binaryPath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "spicetify.exe")
 	}
 	process {
-		Write-Host -Object "Downloading spicetify $targetVersion..." -NoNewline
+		Write-Host -Object "Downloading Spicetify $targetVersion..." -NoNewline
 		$Parameters = @{
-			Uri            = "https://github.com/spicetify/cli/releases/download/$targetVersion/cli-$v-windows-$architecture.exe"
+			Uri            = "https://github.com/$cliOwnerRepo/releases/download/$targetVersion/bespoke-cli-$v-windows-$architecture.exe"
 			UseBasicParsin = $true
 			OutFile        = $binaryPath
 		}

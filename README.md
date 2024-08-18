@@ -16,7 +16,7 @@ Note: On **Windows**, only use `pwsh` as shell! (not `cmd`, not `powershell`)
 
 #### For Users:
 
-Either pick the latest installer for your platform from the [releases](https://github.com/Delusoire/cli/releases) or run the [install.ps1](install.ps1) script
+Either pick the latest installer for your platform from the [releases](https://github.com/Delusoire/bespoke-cli/releases) or run the [install.ps1](install.ps1) script
 
 #### For Developers:
 
