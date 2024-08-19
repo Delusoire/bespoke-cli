@@ -8,13 +8,11 @@ param (
 	[string]$v,
 
 	[Parameter(
-		ParameterSetName = 'Install',
 		HelpMessage = 'Specify the path to the Spicetify folder. default: "$env:LOCALAPPDATA\Spicetify\"'
 	)]
 	[string]$spicetifyFolderPath = "$env:LOCALAPPDATA\Spicetify\",
 
 	[Parameter(
-		ParameterSetName = 'Initialize',
 		HelpMessage = 'Specify the path to the Spicetify executable. default: "$env:LOCALAPPDATA\Spicetify\bin\spicetify.exe"'
 	)]
 	[string]$spicetifyExecutablePath = "$env:LOCALAPPDATA\Spicetify\bin\spicetify.exe",
@@ -37,21 +35,41 @@ param (
 	[switch]$skipURIScheme = $false,
 
 	[Parameter(
-		ParameterSetName = 'Install',
 		HelpMessage = 'Install Spicetify in portable mode. Storing the configuration within $spicetifyFolderPath\config\.'
 	)]
-	[switch]$portable = $false
+	[switch]$portable = $false,
+
+	[Parameter(
+		HelpMessage = 'Install the Spicetify hooks.'
+	)]
+	[switch]$installHooks = $false,
+
+	[Parameter(
+		HelpMessage = 'Build the latest cli & hooks from source. (requires Go and Node.js)'
+	)]
+	[switch]$build = $false
 )
 
 $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 #region Variables
-if ($PSCmdlet.ParameterSetName -eq 'Install') {
-	$cliOwnerRepo = "Delusoire/bespoke-cli"
+$cliOwnerRepo = "Delusoire/bespoke-cli"
+$hooksOwnerRepo = "spicetify/hooks"
 
-	$spicetifyBinaryPath = "$spicetifyFolderPath\bin\"
+$spicetifyPortableBinaryPath = "$spicetifyFolderPath\bin\"
+$spicetifyPortableConfigPath = "$spicetifyFolderPath\config\"
+
+if ($portable) {
+	$spicetifyBinaryPath = $spicetifyPortableBinaryPath
+	$spicetifyConfigPath = $spicetifyPortableConfigPath
 }
+else {
+	$spicetifyBinaryPath = $spicetifyPortableBinaryPath
+	$spicetifyConfigPath = $spicetifyFolderPath
+}
+
+$spicetifyHooksPath = "$spicetifyConfigPath\hooks\"
 #endregion Variables
 
 #region Functions
@@ -95,80 +113,89 @@ function Test-PowerShellVersion {
 		$PSVersionTable.PSVersion -ge $PSMinVersion
 	}
 }
-#endregion Utilities
 
 function Add-Folder {
 	[CmdletBinding()]
-	param ()
+	param (
+		[Parameter(Mandatory = $true)]
+		[string]$path
+	)
 	begin {
-		Write-Host -Object 'Creating Spicetify folder...' -NoNewline
+		Write-Host -Object "Adding $path..." -NoNewline
 	}
 	process {
-		if (Test-Path -Path $spicetifyFolderPath) {
-			Move-Item -Path $spicetifyFolderPath -Destination "$spicetifyFolderPath.old" -Force
+		if (-not (Test-Path -Path $path)) {
+			New-Item -Path $path -ItemType 'Directory' -Force
 		}
-		New-Item -Path $spicetifyFolderPath -ItemType 'Directory' -Force
 	}
 	end {
 		Write-Ok
 	}
 }
 
-function Receive-Binary {
+function Remove-Folder {
 	[CmdletBinding()]
-	param ()
+	param (
+		[Parameter(Mandatory = $true)]
+		[string]$path,
+		[Parameter()]
+		[switch]$rename
+	)
 	begin {
-		if ($env:PROCESSOR_ARCHITECTURE -eq 'AMD64') {
-			$architecture = 'amd64'
-		}
-		elseif ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') {
-			$architecture = 'arm64'
-		}
-		else {
-			$architecture = '386'
-		}
-		if ($v) {
-			$targetVersion = "v$v"
-		}
-		else {
-			Write-Host -Object 'Fetching the latest Spicetify version...' -NoNewline
-			$latestRelease = Invoke-RestMethod -Uri "https://api.github.com/repos/$cliOwnerRepo/releases/latest"
-			$targetVersion = $latestRelease.tag_name
-			Write-Ok
-		}
-		$binaryPath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "spicetify.exe")
+		Write-Host -Object "Removing $path..." -NoNewline
 	}
 	process {
-		Write-Host -Object "Downloading Spicetify $targetVersion..." -NoNewline
-		$Parameters = @{
-			Uri            = "https://github.com/$cliOwnerRepo/releases/download/$targetVersion/bespoke-cli-$v-windows-$architecture.exe"
-			UseBasicParsin = $true
-			OutFile        = $binaryPath
+		if (Test-Path -Path $path) {
+			if ($rename) {
+				Move-Item -Path $path -Destination "$path.old" -Force
+			}
+			else {
+				Remove-Item -Path $path -Recurse -Force
+			}
 		}
-		Invoke-WebRequest @Parameters
-		Write-Ok
 	}
 	end {
-		$binaryPath
+		Write-Ok
 	}
 }
+#endregion Utilities
 
 function Add-BinToPath {
 	[CmdletBinding()]
 	param ()
 	begin {
 		Write-Host -Object 'Making Spicetify available in the PATH...' -NoNewline
-		$user = [EnvironmentVariableTarget]::User
-		$path = [Environment]::GetEnvironmentVariable('PATH', $user)
 	}
 	process {
+		$user = [EnvironmentVariableTarget]::User
+		$path = [Environment]::GetEnvironmentVariable('PATH', $user)
 		if ($path -notlike "*$spicetifyBinaryPath*") {
 			$path = "$path;$spicetifyBinaryPath"
 		}
-	}
-	end {
 		[Environment]::SetEnvironmentVariable('PATH', $path, $user)
 		$env:PATH = $path
+	}
+	end {
+		Write-Ok
+	}
+}
+
+function Initialize-Binary {
+	[CmdletBinding()]
+	param ()
+	begin {
+		if ($portable) {
+			Write-Host -Object 'Creating Spicetify portable config folder...' -NoNewline
+			New-Item -Path $spicetifyConfigPath -ItemType 'Directory' -Force
+			Write-Ok
+		}
+
+		Write-Host -Object 'Initializing Spicetify binary...' -NoNewline
+	}
+	process {
+		& $spicetifyExecutablePath 'init'
+	}
+	end {
 		Write-Ok
 	}
 }
@@ -178,24 +205,51 @@ function Install-Binary {
 	param ()
 	begin {
 		Write-Host -Object 'Installing Spicetify...'
-		Add-Folder
+
+		Write-Host -Object 'Creating Spicetify folder...' -NoNewline
+		Remove-Folder -Path $spicetifyFolderPath -rename
+		Add-Folder -Path $spicetifyFolderPath
+		Write-Ok
 	}
 	process {
-		$downloadedBinaryPath = Receive-Binary
-		Write-Host -Object 'Extracting Spicetify...' -NoNewline
 		New-Item -Path $spicetifyBinaryPath -ItemType 'Directory' -Force
-		Move-Item -Path $downloadedBinaryPath -DestinationPath $spicetifyExecutablePath -Force
-		Write-Ok
-		Add-BinToPath
-		if ($portable) {
-			Write-Host -Object 'Creating Spicetify portable config folder...' -NoNewline
-			$spicetifyPortableConfigPath = "$spicetifyFolderPath\config\"
-			New-Item -Path $spicetifyPortableConfigPath -ItemType 'Directory' -Force
+		if ($build) {
+			Write-Host -Object 'Fetching the latest Spicetify commit...' -NoNewline
+			$lastCommit = Invoke-RestMethod -Uri "https://api.github.com/repos/$cliOwnerRepo/commits/main"
+			$lastCommitSha = $lastCommit.sha
+			Write-Ok
+
+			Write-Host -Object "Building Spicetify commit $lastCommitSha..." -NoNewline
+			$env:GOBIN = $spicetifyBinaryPath
+			& go install "github.com/$cliOwnerRepo/v3@$lastCommitSha"
+			$goExecutableName = $cliOwnerRepo.Split('/')[1]
+			$goExecutablePath = "$env:GOBIN\$goExecutableName.exe"
+			Move-Item -Path $goExecutablePath -Destination $spicetifyExecutablePath -Force
 			Write-Ok
 		}
-		& $spicetifyExecutablePath 'init'
+		else {
+			$architectureMap = @{
+				'AMD64' = 'amd64'
+				'ARM64' = 'arm64'
+			}
+			$architecture = $architectureMap[$env:PROCESSOR_ARCHITECTURE] ?? '386'
+			if ($v) {
+				$targetVersion = "v$v"
+			}
+			else {
+				Write-Host -Object 'Fetching the latest Spicetify version...' -NoNewline
+				$latestRelease = Invoke-RestMethod -Uri "https://api.github.com/repos/$cliOwnerRepo/releases/latest"
+				$targetVersion = $latestRelease.tag_name
+				Write-Ok
+			}
+			Write-Host -Object "Downloading Spicetify $targetVersion..." -NoNewline
+			Invoke-WebRequest -Uri "https://github.com/$cliOwnerRepo/releases/download/$targetVersion/bespoke-cli-$v-windows-$architecture.exe" -UseBasicParsing -OutFile $spicetifyExecutablePath
+			Write-Ok
+		}
 	}
 	end {
+		Add-BinToPath
+		Initialize-Binary
 		Write-Host -Object 'Spicetify was successfully installed!' -ForegroundColor 'Green'
 	}
 }
@@ -260,6 +314,35 @@ function Register-URIScheme {
 		Write-Host -Object 'URI scheme was successfully registered!' -ForegroundColor 'Green'
 	}
 }
+
+function Install-Hooks {
+	[CmdletBinding()]
+	param ()
+	begin {
+		Write-Host -Object 'Installing Spicetify hooks...'
+		Add-Folder -Path $spicetifyConfigPath
+	}
+	process {
+		if ($build) {
+			Write-Host -Object 'Downloading Spicetify hooks...' -NoNewline
+			$spicetifyHooksZip = [System.IO.Path]::GetTempFileName()
+			Invoke-WebRequest -Uri "https://github.com/$hooksOwnerRepo/archive/refs/heads/main.zip" -OutFile $spicetifyHooksZip
+			Expand-Archive -Path $spicetifyHooksZip -DestinationPath $spicetifyConfigPath -Force
+			Move-Item -Path "$spicetifyConfigPath\hooks-main" -Destination $spicetifyHooksPath -Force
+			Write-Ok
+
+			Write-Host -Object 'Building Spicetify hooks...' -NoNewline
+			& npx --package=typescript tsc --project "$spicetifyHooksPath\tsconfig.json"
+			Write-Ok
+		}
+		else {
+			& $spicetifyExecutablePath 'sync'
+		}
+	}
+	end {
+		Write-Host -Object 'Spicetify hooks were successfully installed!' -ForegroundColor 'Green'
+	}
+}
 #endregion Functions
 
 #region Main
@@ -307,6 +390,9 @@ if (-not $skipDaemon) {
 }
 if (-not $skipURIScheme) {
 	Register-URIScheme
+}
+if ($installHooks) {
+	Install-Hooks
 }
 
 Write-Host -Object "`nRun" -NoNewline
