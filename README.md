@@ -1,7 +1,7 @@
 <h3 align="center"><a href="https://spicetify.app/"><img src="https://i.imgur.com/iwcLITQ.png" width="600px"></a></h3>
 <p align="center">
   <a href="https://goreportcard.com/report/github.com/Delusoire/bespoke-cli/v3"><img src="https://goreportcard.com/badge/github.com/Delusoire/bespoke-cli/v3"></a>
-  <a href="https://github.com/Delusoire/bespoke-cli/releases"><img src="https://img.shields.io/github/downloads/spicetify/spicetify-cli/total.svg?colorB=97CA00"></a>
+  <a href="https://github.com/Delusoire/bespoke-cli/releases"><img src="https://img.shields.io/github/downloads/spicetify/cli/total.svg?colorB=97CA00"></a>
   <a href="https://discord.gg/VnevqPp2Rr"><img src="https://img.shields.io/discord/842219447716151306?label=chat&logo=discord&logoColor=discord"></a>
   <a href="https://www.reddit.com/r/spicetify"><img src="https://img.shields.io/reddit/subreddit-subscribers/spicetify?logo=reddit"></a>
 </p>
