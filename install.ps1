@@ -2,7 +2,7 @@
 param (
 	[Parameter(
 		ParameterSetName = 'Install',
-		HelpMessage = 'Specify the version of Spicetify to install (format: 1.2.3). If not specified, the latest version will be installed.'
+		HelpMessage = 'Specify the version of Spicetify to install (format: 1.2.3). If not specified, the latest released version will be installed.'
 	)]
 	[ValidatePattern('^\d+\.\d+\.\d+$')]
 	[string]$v,
