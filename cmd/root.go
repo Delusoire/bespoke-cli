@@ -50,8 +50,9 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&spotifyConfigPath, "spotify-config-path", paths.GetDefaultSpotifyConfigPath(), "Override Spotify config folder (containing prefs & offline.bnk)")
 
 	viper.BindPFlag("mirror", rootCmd.PersistentFlags().Lookup("mirror"))
-	viper.BindPFlag("spotify-data", rootCmd.PersistentFlags().Lookup("spotify-data"))
-	viper.BindPFlag("spotify-config", rootCmd.PersistentFlags().Lookup("spotify-config"))
+	viper.BindPFlag("spotify-data-path", rootCmd.PersistentFlags().Lookup("spotify-data-path"))
+	viper.BindPFlag("spotify-exec-path", rootCmd.PersistentFlags().Lookup("spotify-exec-path"))
+	viper.BindPFlag("spotify-config-path", rootCmd.PersistentFlags().Lookup("spotify-config-path"))
 
 	defaultcfgFile := filepath.Join(paths.ConfigPath, "config.yaml")
 
@@ -63,14 +64,16 @@ func initConfig() {
 	viper.AutomaticEnv()
 
 	viper.SetDefault("mirror", mirror)
-	viper.SetDefault("spotify-data", spotifyDataPath)
-	viper.SetDefault("spotify-config", spotifyConfigPath)
+	viper.SetDefault("spotify-data-path", spotifyDataPath)
+	viper.SetDefault("spotify-exec-path", spotifyExecPath)
+	viper.SetDefault("spotify-config-path", spotifyConfigPath)
 
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 
 		mirror = viper.GetBool("mirror")
-		spotifyDataPath = viper.GetString("spotify-data")
-		spotifyConfigPath = viper.GetString("spotify-config")
+		spotifyDataPath = viper.GetString("spotify-data-path")
+		spotifyExecPath = viper.GetString("spotify-exec-path")
+		spotifyConfigPath = viper.GetString("spotify-config-path")
 	}
 }

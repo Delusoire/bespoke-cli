@@ -14,29 +14,34 @@ import (
 )
 
 var (
-	showSpotiyData    bool
-	showSpotifyConfig bool
-	showConfig        bool
+	showSpotiyDataPath    bool
+	showSpotifyExecPath   bool
+	showSpotifyConfigPath bool
+	showConfigPath        bool
 )
 
 var pathsCmd = &cobra.Command{
 	Use:   "paths",
 	Short: "Print spicetify config",
 	Run: func(cmd *cobra.Command, args []string) {
-		if !showSpotiyData && !showSpotifyConfig && !showConfig {
-			showSpotiyData = true
-			showSpotifyConfig = true
-			showConfig = true
+		if !showSpotiyDataPath && !showSpotifyExecPath && !showSpotifyConfigPath && !showConfigPath {
+			showSpotiyDataPath = true
+			showSpotifyExecPath = true
+			showSpotifyConfigPath = true
+			showConfigPath = true
 		}
 		fmt.Println("mirror:", mirror)
-		if showSpotiyData {
-			fmt.Println("Spotify data:", spotifyDataPath)
+		if showSpotiyDataPath {
+			fmt.Println("Spotify data path:", spotifyDataPath)
 		}
-		if showSpotifyConfig {
-			fmt.Println("Spotify config:", spotifyConfigPath)
+		if showSpotifyExecPath {
+			fmt.Println("Spotify exec path:", spotifyExecPath)
 		}
-		if showConfig {
-			fmt.Println("config file:", paths.ConfigPath)
+		if showSpotifyConfigPath {
+			fmt.Println("Spotify config path:", spotifyConfigPath)
+		}
+		if showConfigPath {
+			fmt.Println("config file path:", paths.ConfigPath)
 		}
 	},
 }
@@ -44,7 +49,8 @@ var pathsCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(pathsCmd)
 
-	pathsCmd.Flags().BoolVar(&showSpotiyData, "spotify-data", false, "Show Spotify data path")
-	pathsCmd.Flags().BoolVar(&showSpotiyData, "spotify-config", false, "Show Spotify config path")
-	pathsCmd.Flags().BoolVar(&showConfig, "config", false, "Show config path")
+	pathsCmd.Flags().BoolVar(&showSpotiyDataPath, "spotify-data-path", false, "Show Spotify data path")
+	pathsCmd.Flags().BoolVar(&showSpotifyExecPath, "spotify-exec-path", false, "Show Spotify exec path")
+	pathsCmd.Flags().BoolVar(&showSpotifyConfigPath, "spotify-config-path", false, "Show Spotify config path")
+	pathsCmd.Flags().BoolVar(&showConfigPath, "config", false, "Show config path")
 }
