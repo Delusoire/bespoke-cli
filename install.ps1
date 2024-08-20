@@ -276,36 +276,55 @@ function Initialize-Daemon {
 	param ()
 	begin {
 		Write-Host -Object 'Creating Spicetify daemon task...'
-	}
-	process {
-		$initTask = {
-			$taskName = "Spicetify daemon"
-			$description = "Launches Spicetify daemon at startup"
-			$command = $spicetifyExecutablePath
-			$arguments = "daemon"
+
+		$CreateTask = {
+			[CmdletBinding()]
+			param(
+				[Parameter(Mandatory = $true)]
+				[string]$name,
+				[Parameter(Mandatory = $true)]
+				[string]$description,
+				[Parameter(Mandatory = $true)]
+				[string]$command,
+				[Parameter(Mandatory = $true)]
+				[string]$arguments,
+				[Parameter(Mandatory = $true)]
+				[string]$userId
+			)
 
 			$action = New-ScheduledTaskAction -Execute $command -Argument $arguments
 			$trigger = New-ScheduledTaskTrigger -AtStartup
 			$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Seconds 0)
-			$principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType S4U -RunLevel Limited
+			$principal = New-ScheduledTaskPrincipal -UserId $userId -LogonType S4U -RunLevel Limited
 
 			$task = New-ScheduledTask -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Description $description
 
-			Register-ScheduledTask -TaskName $taskName -InputObject $task
-			Start-ScheduledTask -TaskName $taskName
+			Register-ScheduledTask -TaskName $name -InputObject $task
+		}
+	}
+	process {
+		$taskParameters = @{
+			name        = "Spicetify daemon"
+			description = "Launches Spicetify daemon at startup"
+			command     = $spicetifyExecutablePath
+			arguments   = "daemon"
+			userId      = $env:USERNAME
 		}
 
 		if (Test-Admin) {
-			& $initTask
+			& $CreateTask @taskParameters
 		}
 		else {
+			$splattedTaskParameters = $taskParameters.GetEnumerator() | ForEach-Object { '-' + $_.Key; $_.Value } | Join-String -Separator ' ' -DoubleQuote
+
 			Write-Host -Object 'Running the task as administrator...' -NoNewline
-			$tempFile = [System.IO.Path]::GetTempFileName()
-			$tempFile += ".ps1"
-			$initTask | Out-File -FilePath $tempFile -Encoding UTF8
-			Start-Process powershell "-NoProfile -ExecutionPolicy Bypass -File `"$tempFile`"" -PassThru -Verb RunAs -WindowStyle Hidden -Wait
+			$tempFile = [System.IO.Path]::GetTempFileName() + '.ps1'
+			$CreateTask | Out-File -FilePath $tempFile -Encoding UTF8
+			Start-Process pwsh -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $tempFile, $splattedTaskParameters -PassThru -Verb RunAs -WindowStyle Hidden -Wait
 			Write-Ok
 		}
+
+		Start-ScheduledTask -TaskName $taskParameters.name
 	}
 	end {
 		Write-Host -Object 'Deamon task was successfully created!' -ForegroundColor 'Green'
