@@ -323,7 +323,8 @@ function Register-URIScheme {
 		$command = "`"$spicetifyExecutablePath`" protocol `"%1`""
 
 		$K = New-Item -Path "HKCU:\Software\Classes\$scheme" -Force
-		$K.SetValue("", "URL:$scheme Protocol", [Microsoft.Win32.RegistryValueKind]::String)
+		$K.SetValue("", "URL:$scheme", [Microsoft.Win32.RegistryValueKind]::String)
+		$K.SetValue("URL Protocol", "", [Microsoft.Win32.RegistryValueKind]::String)
 		$K = $K.CreateSubKey("shell\open\command")
 		$K.SetValue("", "$command", [Microsoft.Win32.RegistryValueKind]::String)
 	}
