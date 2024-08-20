@@ -12,19 +12,20 @@ import (
 
 	"github.com/Delusoire/bespoke-cli/v3/paths"
 
+	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var (
-	// autoUpdate bool
-
 	mirror            bool
 	spotifyDataPath   string
 	spotifyExecPath   string
 	spotifyConfigPath string
 	cfgFile           string
 )
+
+var rootLogger = log.New(os.Stderr)
 
 var rootCmd = &cobra.Command{
 	Use:   "spicetify",

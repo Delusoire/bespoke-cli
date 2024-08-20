@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"fmt"
 	"net/url"
 	"os/exec"
 	"runtime"
@@ -29,7 +28,7 @@ var protocolCmd = &cobra.Command{
 			open("spotify:app:rpc:" + res)
 		}
 		if err != nil {
-			fmt.Println(err)
+			rootLogger.Fatal(err)
 		}
 	},
 }

@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httputil"
@@ -19,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/Delusoire/bespoke-cli/v3/paths"
+	"github.com/charmbracelet/log"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
@@ -39,8 +39,8 @@ var daemonCmd = &cobra.Command{
 	Short: "Run daemon",
 	Run: func(cmd *cobra.Command, args []string) {
 		if daemon {
-			fmt.Println("Starting daemon")
-			startDaemon()
+			rootLogger.Info("Starting daemon")
+			startDaemon(rootLogger)
 		}
 	},
 }
@@ -49,8 +49,8 @@ var daemonStartCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Start daemon",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Starting daemon")
-		startDaemon()
+		rootLogger.Info("Starting daemon")
+		startDaemon(rootLogger)
 	},
 }
 
@@ -58,7 +58,7 @@ var daemonEnableCmd = &cobra.Command{
 	Use:   "enable",
 	Short: "Enable daemon",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Enabling daemon")
+		rootLogger.Info("Enabling daemon")
 		daemon = true
 		viper.Set("daemon", daemon)
 		viper.WriteConfig()
@@ -69,7 +69,7 @@ var daemonDisableCmd = &cobra.Command{
 	Use:   "disable",
 	Short: "Disable daemon",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Disabling daemon")
+		rootLogger.Info("Disabling daemon")
 		daemon = false
 		viper.Set("daemon", daemon)
 		viper.WriteConfig()
@@ -89,7 +89,7 @@ func init() {
 	viper.SetDefault("daemon", false)
 }
 
-func startDaemon() {
+func startDaemon(logger *log.Logger) {
 	c := make(chan struct{})
 	var (
 		watcherCtx    context.Context
@@ -98,7 +98,7 @@ func startDaemon() {
 
 	startWatcher := func() {
 		watcherCtx, watcherCancel = context.WithCancel(context.Background())
-		go watchSpotifyApps(watcherCtx, spotifyDataPath)
+		go watchSpotifyApps(watcherCtx, spotifyDataPath, logger.WithPrefix("Watcher"))
 	}
 
 	viper.OnConfigChange(func(in fsnotify.Event) {
@@ -136,10 +136,10 @@ func startDaemon() {
 	go viper.WatchConfig()
 	startWatcher()
 	go func() {
-		setupProxy()
-		setupWebSocket()
+		setupProxy(logger.WithPrefix("Proxy"))
+		setupWebSocket(logger.WithPrefix("WebSocket"))
 		err := http.ListenAndServe(DaemonAddr, nil)
-		log.Panicln(err)
+		logger.Fatalf("failed to start server: %s", err)
 	}()
 
 	<-c
@@ -147,32 +147,32 @@ func startDaemon() {
 	os.Exit(0)
 }
 
-func watchSpotifyApps(ctx context.Context, spotifyDataPath string) {
+func watchSpotifyApps(ctx context.Context, spotifyDataPath string, logger *log.Logger) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Panicln(err)
+		logger.Fatal(err)
 	}
 	defer watcher.Close()
 
-	log.Println("Watcher: watching:", paths.GetSpotifyAppsPath(spotifyDataPath))
+	logger.Infof("watching: %s", paths.GetSpotifyAppsPath(spotifyDataPath))
 	if err := watcher.Add(paths.GetSpotifyAppsPath(spotifyDataPath)); err != nil {
-		log.Panicln(err)
+		logger.Fatal(err)
 	}
 
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("Watcher: stopping")
+			logger.Info("stopping")
 			return
 		case event, ok := <-watcher.Events:
 			if !ok {
 				continue
 			}
-			log.Println("Watcher: event:", event)
+			logger.Infof("event: %s", event)
 			if event.Has(fsnotify.Create) {
 				if strings.HasSuffix(event.Name, "xpui.spa") {
-					if err := execApply(); err != nil {
-						log.Println(err)
+					if err := execApply(logger); err != nil {
+						logger.Warn(err)
 					}
 				}
 			}
@@ -180,7 +180,7 @@ func watchSpotifyApps(ctx context.Context, spotifyDataPath string) {
 			if !ok {
 				continue
 			}
-			log.Println("Watcher: !:", err)
+			logger.Warn(err)
 		}
 	}
 }
@@ -192,11 +192,11 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func setupWebSocket() {
+func setupWebSocket(logger *log.Logger) {
 	http.HandleFunc("/rpc", func(w http.ResponseWriter, r *http.Request) {
 		c, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			log.Println("WebSocket: upgrade:", err)
+			logger.Infof("failed to upgrade: %s", err)
 			return
 		}
 		defer c.Close()
@@ -204,15 +204,15 @@ func setupWebSocket() {
 		for {
 			_, p, err := c.ReadMessage()
 			if err != nil {
-				log.Println("WebSocket: !read:", err)
+				logger.Warnf("failed to read: %s", err)
 				break
 			}
 
 			incoming := string(p)
-			log.Println("recv:", incoming)
+			logger.Infof("recv: %s", incoming)
 			res, err := HandleProtocol(incoming)
 			if err != nil {
-				log.Println("WebSocket: !handle:", err)
+				logger.Warnf("protocol error: %s", err)
 			}
 			if res != "" {
 				c.WriteMessage(websocket.TextMessage, []byte(res))
@@ -221,17 +221,17 @@ func setupWebSocket() {
 	})
 }
 
-func setupProxy() {
+func setupProxy(logger *log.Logger) {
 	proxy := (&httputil.ReverseProxy{
 		Transport: &CustomTransport{Transport: http.DefaultTransport},
 		Rewrite: func(r *httputil.ProxyRequest) {
 			p, ok := strings.CutPrefix(r.In.URL.Path, "/proxy/")
 			if !ok {
-				log.Panicln(errors.New("proxy received invalid path"))
+				logger.Fatal(errors.New("proxy received invalid path"))
 			}
 			u, err := url.Parse(p)
 			if err != nil {
-				log.Panicln(fmt.Errorf("proxy received invalid path: %w", err))
+				logger.Fatal(fmt.Errorf("proxy received invalid path: %w", err))
 			}
 
 			r.Out.URL = u

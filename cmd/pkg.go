@@ -6,8 +6,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/Delusoire/bespoke-cli/v3/module"
 
 	"github.com/spf13/cobra"
@@ -28,8 +26,9 @@ var pkgInstallCmd = &cobra.Command{
 		identifier := module.NewStoreIdentifier(id)
 		aurl := module.ArtifactURL(url).Parse().ToUrl()
 		if err := addAndInstall(aurl, identifier); err != nil {
-			fmt.Println(err)
+			rootLogger.Fatal(err)
 		}
+		rootLogger.Info("Module added")
 	},
 }
 
@@ -51,8 +50,9 @@ var pkgDeleteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		identifier := module.NewStoreIdentifier(args[0])
 		if err := deleteAndRemove(identifier); err != nil {
-			fmt.Println(err)
+			rootLogger.Fatal(err)
 		}
+		rootLogger.Info("Module deleted")
 	},
 }
 
@@ -71,8 +71,9 @@ var pkgEnableCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		identifier := module.NewStoreIdentifier(args[0])
 		if err := module.EnableModuleInVault(identifier); err != nil {
-			fmt.Println(err)
+			rootLogger.Fatal(err)
 		}
+		rootLogger.Info("Module enabled")
 	},
 }
 

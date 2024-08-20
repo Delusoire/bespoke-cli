@@ -8,7 +8,7 @@ package cmd
 import (
 	"bytes"
 	"errors"
-	"fmt"
+
 	"os"
 	"strings"
 
@@ -21,12 +21,10 @@ var updateCmd = &cobra.Command{
 	Args:      cobra.ExactArgs(1),
 	ValidArgs: []string{"on", "off"},
 	Run: func(cmd *cobra.Command, args []string) {
-		b := args[0] == "on"
-		if err := toggleUpdates(b); err != nil {
-			fmt.Println(err)
-			return
+		if err := toggleUpdates(args[0] == "on"); err != nil {
+			rootLogger.Fatal(err)
 		}
-		fmt.Println("Patched the executable successfully")
+		rootLogger.Info("Patched the executable successfully")
 	},
 }
 
