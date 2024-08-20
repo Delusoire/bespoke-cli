@@ -95,7 +95,7 @@ of Spotify), you must tell spicetify to use mirror mode.
 For the Microsoft Store version of Spotify, this would be enough:
 
 ```
-$configPath = "$env:LOCALAPPDATA\spicetify\config.yaml"
+$configPath = "$env:LOCALAPPDATA\Spicetify\config.yaml"
 $spotifyPackage = Get-AppxPackage | Where-Object -Property Name -Eq "SpotifyAB.SpotifyMusic"
 "mirror: true" >> $configPath
 "spotify-data-path: $($spotifyPackage.InstallLocation)" >> $configPath
