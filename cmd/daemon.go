@@ -97,41 +97,39 @@ func startDaemon() {
 	)
 
 	startWatcher := func() {
-		if watcherCancel != nil {
-			watcherCancel()
-		}
 		watcherCtx, watcherCancel = context.WithCancel(context.Background())
 		go watchSpotifyApps(watcherCtx, spotifyDataPath)
 	}
 
 	viper.OnConfigChange(func(in fsnotify.Event) {
+		restartWatcher := false
+
 		_daemon := viper.GetBool("daemon")
-		if _daemon != daemon {
-			daemon = _daemon
-			if !daemon {
-				close(c)
-			}
-		}
-
 		_mirror := viper.GetBool("mirror")
-		if _mirror != mirror {
-			mirror = _mirror
-		}
-
 		_spotifyDataPath := viper.GetString("spotify-data-path")
-		if _spotifyDataPath != spotifyDataPath {
-			spotifyDataPath = _spotifyDataPath
-			startWatcher()
-		}
-
 		_spotifyExecPath := viper.GetString("spotify-exec-path")
-		if _spotifyExecPath != spotifyExecPath {
-			spotifyExecPath = _spotifyExecPath
+		_spotifyConfigPath := viper.GetString("spotify-config-path")
+
+		if _spotifyDataPath != spotifyDataPath {
+			if watcherCancel != nil {
+				// TODO: wait for watcher to stop
+				watcherCancel()
+			}
+			restartWatcher = true
 		}
 
-		_spotifyConfigPath := viper.GetString("spotify-config-path")
-		if _spotifyConfigPath != spotifyConfigPath {
-			spotifyConfigPath = _spotifyConfigPath
+		daemon = _daemon
+		mirror = _mirror
+		spotifyDataPath = _spotifyDataPath
+		spotifyExecPath = _spotifyExecPath
+		spotifyConfigPath = _spotifyConfigPath
+
+		if !daemon {
+			close(c)
+		}
+
+		if restartWatcher {
+			startWatcher()
 		}
 	})
 
