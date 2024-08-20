@@ -85,8 +85,6 @@ func init() {
 	rootCmd.AddCommand(daemonCmd)
 
 	daemonCmd.AddCommand(daemonStartCmd, daemonEnableCmd, daemonDisableCmd)
-
-	viper.SetDefault("daemon", false)
 }
 
 func startDaemon(logger *log.Logger) {
