@@ -388,15 +388,19 @@ else {
 
 #region Spicetify
 if (-not $skipBinary) {
+	Write-Host
 	Install-Binary
 }
 if (-not $skipDaemon) {
+	Write-Host
 	Initialize-Daemon
 }
 if (-not $skipURIScheme) {
+	Write-Host
 	Register-URIScheme
 }
 if ($installHooks) {
+	Write-Host
 	Install-Hooks
 }
 
