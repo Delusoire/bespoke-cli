@@ -125,7 +125,7 @@ function Add-Folder {
 	}
 	process {
 		if (-not (Test-Path -Path $path)) {
-			New-Item -Path $path -ItemType 'Directory' -Force
+			New-Item -Path $path -ItemType 'Directory' -Force | Out-Null
 		}
 	}
 	end {
@@ -206,13 +206,12 @@ function Install-Binary {
 	begin {
 		Write-Host -Object 'Installing Spicetify...'
 
-		Write-Host -Object 'Creating Spicetify folder...' -NoNewline
+		Write-Host -Object 'Creating Spicetify folder...'
 		Remove-Folder -Path $spicetifyFolderPath -rename
 		Add-Folder -Path $spicetifyFolderPath
-		Write-Ok
 	}
 	process {
-		New-Item -Path $spicetifyBinaryPath -ItemType 'Directory' -Force
+		Add-Folder -Path $spicetifyBinaryPath -ItemType 'Directory' -Force
 		if ($build) {
 			Write-Host -Object 'Fetching the latest Spicetify commit...' -NoNewline
 			$lastCommit = Invoke-RestMethod -Uri "https://api.github.com/repos/$cliOwnerRepo/commits/main"
@@ -279,7 +278,7 @@ function Initialize-Daemon {
 		}
 
 		if (Test-Admin) {
-			Invoke-Expression $initTask
+			& $initTask
 		}
 		else {
 			Write-Host -Object 'Running the task as administrator...' -NoNewline
