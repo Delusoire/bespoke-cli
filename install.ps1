@@ -159,6 +159,25 @@ function Remove-Dir {
 		Write-Ok
 	}
 }
+
+function Invoke-Command {
+	[CmdletBinding()]
+	param (
+		[Parameter(Mandatory = $true)]
+		[string]$command,
+		[Parameter()]
+		[string[]]$arguments
+	)
+	begin {
+		Write-Host -Object "`n> $command $($arguments -join ' ')"
+	}
+	process {
+		& $command @arguments
+	}
+	end {
+		Write-Host
+	}
+}
 #endregion Utilities
 
 function Add-BinToPath {
@@ -194,9 +213,7 @@ function Initialize-Binary {
 		Write-Host -Object 'Initializing Spicetify binary...'
 	}
 	process {
-		Write-Host
-		& $spicetifyExecutablePath 'init'
-		Write-Host
+		Invoke-Command -Command $spicetifyExecutablePath -Arguments 'init'
 	}
 }
 
@@ -221,9 +238,7 @@ function Install-Binary {
 			Write-Host -Object "Building Spicetify commit $lastCommitSha..."
 			$env:GOBIN = $spicetifyBinaryPath
 
-			Write-Host
-			& go install "github.com/$cliOwnerRepo/v3@$lastCommitSha"
-			Write-Host
+			Invoke-Command -Command go -Arguments 'install', "github.com/$cliOwnerRepo/v3@$lastCommitSha"
 
 			$goExecutableName = $cliOwnerRepo.Split('/')[1]
 			$goExecutablePath = "$env:GOBIN\$goExecutableName.exe"
@@ -334,14 +349,10 @@ function Install-Hooks {
 			Write-Ok
 
 			Write-Host -Object 'Building Spicetify hooks...'
-			Write-Host
-			& npx --package=typescript tsc --project "$spicetifyHooksPath\tsconfig.json"
-			Write-Host
+			Invoke-Command -Command 'npx' -Arguments '--package=typescript', 'tsc', '--project', "$spicetifyHooksPath\tsconfig.json"
 		}
 		else {
-			Write-Host
-			& $spicetifyExecutablePath 'sync'
-			Write-Host
+			Invoke-Command -Command $spicetifyExecutablePath -Arguments 'sync'
 		}
 	}
 	end {
