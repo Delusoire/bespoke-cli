@@ -16,8 +16,8 @@ var configCmd = &cobra.Command{
 	Short: "Print spicetify config",
 	Run: func(cmd *cobra.Command, args []string) {
 		rootLogger.Infof("config file path: %s", paths.ConfigPath)
-		rootLogger.Infof("daemon: %s", daemon)
-		rootLogger.Infof("mirror: %s", mirror)
+		rootLogger.Infof("daemon: %t", daemon)
+		rootLogger.Infof("mirror: %t", mirror)
 		rootLogger.Infof("Spotify data path: %s", spotifyDataPath)
 		rootLogger.Infof("Spotify exec path: %s", spotifyExecPath)
 		rootLogger.Infof("Spotify config path: %s", spotifyConfigPath)

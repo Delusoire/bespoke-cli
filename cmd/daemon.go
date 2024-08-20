@@ -77,11 +77,6 @@ var daemonDisableCmd = &cobra.Command{
 }
 
 func init() {
-	cobra.OnInitialize(func() {
-		viper.SetDefault("daemon", true)
-		daemon = viper.GetBool("daemon")
-	})
-
 	rootCmd.AddCommand(daemonCmd)
 
 	daemonCmd.AddCommand(daemonStartCmd, daemonEnableCmd, daemonDisableCmd)
