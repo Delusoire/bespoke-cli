@@ -93,12 +93,9 @@ function Write-Error {
 function Test-Admin {
 	[CmdletBinding()]
 	param ()
-	begin {
-		Write-Host -Object "Checking if the script is not being run as administrator..." -NoNewline
-	}
 	process {
 		$currentUser = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
-		-not $currentUser.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+		$currentUser.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 	}
 }
 
@@ -194,13 +191,12 @@ function Initialize-Binary {
 			Write-Ok
 		}
 
-		Write-Host -Object 'Initializing Spicetify binary...' -NoNewline
+		Write-Host -Object 'Initializing Spicetify binary...'
 	}
 	process {
+		Write-Host
 		& $spicetifyExecutablePath 'init'
-	}
-	end {
-		Write-Ok
+		Write-Host
 	}
 }
 
@@ -222,13 +218,16 @@ function Install-Binary {
 			$lastCommitSha = $lastCommit.sha
 			Write-Ok
 
-			Write-Host -Object "Building Spicetify commit $lastCommitSha..." -NoNewline
+			Write-Host -Object "Building Spicetify commit $lastCommitSha..."
 			$env:GOBIN = $spicetifyBinaryPath
+
+			Write-Host
 			& go install "github.com/$cliOwnerRepo/v3@$lastCommitSha"
+			Write-Host
+
 			$goExecutableName = $cliOwnerRepo.Split('/')[1]
 			$goExecutablePath = "$env:GOBIN\$goExecutableName.exe"
 			Move-Item -Path $goExecutablePath -Destination $spicetifyExecutablePath -Force
-			Write-Ok
 		}
 		else {
 			$architectureMap = @{
@@ -302,7 +301,7 @@ function Register-URIScheme {
 	[CmdletBinding()]
 	param ()
 	begin {
-		Write-Host -Object 'Registering Spicetify URI scheme...' -NoNewline
+		Write-Host -Object 'Registering Spicetify URI scheme...'
 	}
 	process {
 		$scheme = "spicetify"
@@ -334,12 +333,15 @@ function Install-Hooks {
 			Move-Item -Path "$spicetifyConfigPath\hooks-main" -Destination $spicetifyHooksPath -Force
 			Write-Ok
 
-			Write-Host -Object 'Building Spicetify hooks...' -NoNewline
+			Write-Host -Object 'Building Spicetify hooks...'
+			Write-Host
 			& npx --package=typescript tsc --project "$spicetifyHooksPath\tsconfig.json"
-			Write-Ok
+			Write-Host
 		}
 		else {
+			Write-Host
 			& $spicetifyExecutablePath 'sync'
+			Write-Host
 		}
 	}
 	end {
@@ -364,7 +366,7 @@ if (-not (Test-PowerShellVersion)) {
 else {
 	Write-Ok
 }
-if (-not (Test-Admin)) {
+if (Test-Admin) {
 	Write-Error
 	Write-Warning -Message "The script was run as administrator. This can result in problems with the installation process or unexpected behavior. Do not continue if you do not know what you are doing."
 	$Host.UI.RawUI.Flushinputbuffer()
