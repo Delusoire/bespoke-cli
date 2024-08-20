@@ -10,7 +10,7 @@ param (
 	[Parameter(
 		HelpMessage = 'Specify the path to the Spicetify folder. default: "$env:LOCALAPPDATA\Spicetify\"'
 	)]
-	[string]$spicetifyFolderPath = "$env:LOCALAPPDATA\Spicetify\",
+	[string]$spicetifyFolderPath = "$env:LOCALAPPDATA\Spicetify",
 
 	[Parameter(
 		HelpMessage = 'Specify the path to the Spicetify executable. default: "$env:LOCALAPPDATA\Spicetify\bin\spicetify.exe"'
@@ -57,8 +57,8 @@ $ErrorActionPreference = 'Stop'
 $cliOwnerRepo = "Delusoire/bespoke-cli"
 $hooksOwnerRepo = "spicetify/hooks"
 
-$spicetifyPortableBinaryPath = "$spicetifyFolderPath\bin\"
-$spicetifyPortableConfigPath = "$spicetifyFolderPath\config\"
+$spicetifyPortableBinaryPath = "$spicetifyFolderPath\bin"
+$spicetifyPortableConfigPath = "$spicetifyFolderPath\config"
 
 if ($portable) {
 	$spicetifyBinaryPath = $spicetifyPortableBinaryPath
@@ -69,7 +69,7 @@ else {
 	$spicetifyConfigPath = $spicetifyFolderPath
 }
 
-$spicetifyHooksPath = "$spicetifyConfigPath\hooks\"
+$spicetifyHooksPath = "$spicetifyConfigPath\hooks"
 #endregion Variables
 
 #region Functions
