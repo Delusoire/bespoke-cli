@@ -147,7 +147,11 @@ function Remove-Dir {
 	process {
 		if (Test-Path -Path $path) {
 			if ($rename) {
-				Move-Item -Path $path -Destination "$path.old" -Force
+				$oldPath = "$path.old"
+				if (Test-Path -Path $oldPath) {
+					Remove-Item -Path $oldPath -Recurse -Force
+				}
+				Move-Item -Path $path -Destination $oldPath -Force
 			}
 			else {
 				Remove-Item -Path $path -Recurse -Force
