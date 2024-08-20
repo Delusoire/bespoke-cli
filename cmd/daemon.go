@@ -113,10 +113,25 @@ func startDaemon() {
 			}
 		}
 
-		_spotifyDataPath := viper.GetString("spotify-data")
+		_mirror := viper.GetBool("mirror")
+		if _mirror != mirror {
+			mirror = _mirror
+		}
+
+		_spotifyDataPath := viper.GetString("spotify-data-path")
 		if _spotifyDataPath != spotifyDataPath {
 			spotifyDataPath = _spotifyDataPath
 			startWatcher()
+		}
+
+		_spotifyExecPath := viper.GetString("spotify-exec-path")
+		if _spotifyExecPath != spotifyExecPath {
+			spotifyExecPath = _spotifyExecPath
+		}
+
+		_spotifyConfigPath := viper.GetString("spotify-config-path")
+		if _spotifyConfigPath != spotifyConfigPath {
+			spotifyConfigPath = _spotifyConfigPath
 		}
 	})
 
