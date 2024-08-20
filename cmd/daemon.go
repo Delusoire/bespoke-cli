@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	"net/http/cookiejar"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/Delusoire/bespoke-cli/v3/paths"
@@ -89,50 +91,37 @@ func init() {
 
 func startDaemon() {
 	c := make(chan struct{})
+	var (
+		watcherCtx    context.Context
+		watcherCancel context.CancelFunc
+	)
+
+	startWatcher := func() {
+		if watcherCancel != nil {
+			watcherCancel()
+		}
+		watcherCtx, watcherCancel = context.WithCancel(context.Background())
+		go watchSpotifyApps(watcherCtx, spotifyDataPath)
+	}
 
 	viper.OnConfigChange(func(in fsnotify.Event) {
-		daemon = viper.GetBool("daemon")
-		if !daemon {
-			close(c)
-		}
-	})
-	go viper.WatchConfig()
-
-	go func() {
-		watcher, err := fsnotify.NewWatcher()
-		if err != nil {
-			log.Panicln(err)
-		}
-		defer watcher.Close()
-
-		log.Println("Watcher: watching:", paths.GetSpotifyAppsPath(spotifyDataPath))
-		if err := watcher.Add(paths.GetSpotifyAppsPath(spotifyDataPath)); err != nil {
-			log.Panicln(err)
-		}
-
-		for {
-			select {
-			case event, ok := <-watcher.Events:
-				if !ok {
-					continue
-				}
-				log.Println("Watcher: event:", event)
-				if event.Has(fsnotify.Create) {
-					if strings.HasSuffix(event.Name, "xpui.spa") {
-						if err := execApply(); err != nil {
-							log.Println(err)
-						}
-					}
-				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					continue
-				}
-				log.Println("Watcher: !:", err)
+		_daemon := viper.GetBool("daemon")
+		if _daemon != daemon {
+			daemon = _daemon
+			if !daemon {
+				close(c)
 			}
 		}
-	}()
 
+		_spotifyDataPath := viper.GetString("spotify-data")
+		if _spotifyDataPath != spotifyDataPath {
+			spotifyDataPath = _spotifyDataPath
+			startWatcher()
+		}
+	})
+
+	go viper.WatchConfig()
+	startWatcher()
 	go func() {
 		setupProxy()
 		setupWebSocket()
@@ -141,6 +130,46 @@ func startDaemon() {
 	}()
 
 	<-c
+
+	os.Exit(0)
+}
+
+func watchSpotifyApps(ctx context.Context, spotifyDataPath string) {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Panicln(err)
+	}
+	defer watcher.Close()
+
+	log.Println("Watcher: watching:", paths.GetSpotifyAppsPath(spotifyDataPath))
+	if err := watcher.Add(paths.GetSpotifyAppsPath(spotifyDataPath)); err != nil {
+		log.Panicln(err)
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			log.Println("Watcher: stopping")
+			return
+		case event, ok := <-watcher.Events:
+			if !ok {
+				continue
+			}
+			log.Println("Watcher: event:", event)
+			if event.Has(fsnotify.Create) {
+				if strings.HasSuffix(event.Name, "xpui.spa") {
+					if err := execApply(); err != nil {
+						log.Println(err)
+					}
+				}
+			}
+		case err, ok := <-watcher.Errors:
+			if !ok {
+				continue
+			}
+			log.Println("Watcher: !:", err)
+		}
+	}
 }
 
 var upgrader = websocket.Upgrader{
