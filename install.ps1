@@ -114,7 +114,7 @@ function Test-PowerShellVersion {
 	}
 }
 
-function Add-Folder {
+function Add-Dir {
 	[CmdletBinding()]
 	param (
 		[Parameter(Mandatory = $true)]
@@ -133,7 +133,7 @@ function Add-Folder {
 	}
 }
 
-function Remove-Folder {
+function Remove-Dir {
 	[CmdletBinding()]
 	param (
 		[Parameter(Mandatory = $true)]
@@ -207,11 +207,11 @@ function Install-Binary {
 		Write-Host -Object 'Installing Spicetify...'
 
 		Write-Host -Object 'Creating Spicetify folder...'
-		Remove-Folder -Path $spicetifyFolderPath -rename
-		Add-Folder -Path $spicetifyFolderPath
+		Remove-Dir -Path $spicetifyFolderPath -rename
+		Add-Dir -Path $spicetifyFolderPath
 	}
 	process {
-		Add-Folder -Path $spicetifyBinaryPath -ItemType 'Directory' -Force
+		Add-Dir -Path $spicetifyBinaryPath
 		if ($build) {
 			Write-Host -Object 'Fetching the latest Spicetify commit...' -NoNewline
 			$lastCommit = Invoke-RestMethod -Uri "https://api.github.com/repos/$cliOwnerRepo/commits/main"
@@ -319,7 +319,7 @@ function Install-Hooks {
 	param ()
 	begin {
 		Write-Host -Object 'Installing Spicetify hooks...'
-		Add-Folder -Path $spicetifyConfigPath
+		Add-Dir -Path $spicetifyConfigPath
 	}
 	process {
 		if ($build) {
