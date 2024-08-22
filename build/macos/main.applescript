@@ -43,7 +43,7 @@ end launchAgentExists
 on createLaunchAgent(plistPath, agentName, binPath)
    set plistPathQ to quoted form of plistPath
    do shell script "plutil -create xml1 " & plistPathQ
-   do shell script "plutil -insert Label -string " & quoted form of launchAgentName & " " & plistPathQ
+   do shell script "plutil -insert Label -string " & quoted form of agentName & " " & plistPathQ
    do shell script "plutil -insert ProgramArguments -array -string " & quoted form of binPath & " -string daemon " & plistPathQ
    do shell script "plutil -insert RunAtLoad -bool true " & plistPathQ
 end createLaunchAgent
