@@ -7,6 +7,7 @@ package cmd
 
 import (
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/Delusoire/bespoke-cli/v3/archive"
@@ -34,7 +35,11 @@ func installHooks() error {
 	}
 	defer res.Body.Close()
 
-	return archive.UnTarGZ(res.Body, filepath.Join(paths.ConfigPath, "hooks"))
+	hooksPath := filepath.Join(paths.ConfigPath, "hooks")
+	if err := os.RemoveAll(hooksPath); err != nil {
+		return err
+	}
+	return archive.UnTarGZ(res.Body, hooksPath)
 }
 
 func init() {
