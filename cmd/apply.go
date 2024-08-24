@@ -46,13 +46,17 @@ func extractSpa(spa string, destFolder string, logger *log.Logger) error {
 	extractDest := filepath.Join(destFolder, strings.TrimSuffix(basename, ".spa"))
 	logger.Infof("Extracting %s -> %s", spa, extractDest)
 
-	r, err := zip.OpenReader(spa)
-	if err != nil {
-		return err
-	}
-	defer r.Close()
+	unzipSpa := func(spa, extractDest string) error {
+		r, err := zip.OpenReader(spa)
+		if err != nil {
+			return err
+		}
+		defer r.Close()
 
-	if err := archive.UnZip(&r.Reader, extractDest); err != nil {
+		return archive.UnZip(&r.Reader, extractDest)
+	}
+
+	if err := unzipSpa(spa, extractDest); err != nil {
 		return err
 	}
 
