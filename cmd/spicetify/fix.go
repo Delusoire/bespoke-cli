@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package cmd
+package spicetify
 
 import (
 	"fmt"
@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Delusoire/bespoke-cli/v3/cmd/vars"
 	"github.com/Delusoire/bespoke-cli/v3/paths"
 	"github.com/charmbracelet/log"
 
@@ -29,10 +30,10 @@ var fixCmd = &cobra.Command{
 }
 
 func execFix(logger *log.Logger) error {
-	if mirror {
+	if vars.Mirror {
 		os.RemoveAll(filepath.Join(paths.ConfigPath, "apps"))
 	} else {
-		spaBakGlob := filepath.Join(paths.GetSpotifyAppsPath(spotifyDataPath), "*.spa.bak")
+		spaBakGlob := filepath.Join(paths.GetSpotifyAppsPath(vars.SpotifyDataPath), "*.spa.bak")
 		spaBaks, err := filepath.Glob(spaBakGlob)
 		if err != nil {
 			return err
@@ -53,8 +54,4 @@ func execFix(logger *log.Logger) error {
 	}
 
 	return nil
-}
-
-func init() {
-	rootCmd.AddCommand(fixCmd)
 }

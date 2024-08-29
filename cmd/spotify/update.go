@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package cmd
+package spotify
 
 import (
 	"bytes"
@@ -12,6 +12,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Delusoire/bespoke-cli/v3/cmd/vars"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +30,7 @@ var updateCmd = &cobra.Command{
 }
 
 func toggleUpdates(b bool) error {
-	file, err := os.OpenFile(spotifyExecPath, os.O_RDWR, 0644)
+	file, err := os.OpenFile(vars.SpotifyExecPath, os.O_RDWR, 0644)
 	if err != nil {
 		return err
 	}
@@ -51,8 +52,4 @@ func toggleUpdates(b bool) error {
 	}
 	file.WriteAt([]byte(s), int64(i+15))
 	return nil
-}
-
-func init() {
-	rootCmd.AddCommand(updateCmd)
 }

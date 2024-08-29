@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package cmd
+package spicetify
 
 import (
 	"net/http"
@@ -40,8 +40,4 @@ func installHooks() error {
 		return err
 	}
 	return archive.UnTarGZ(res.Body, hooksPath)
-}
-
-func init() {
-	rootCmd.AddCommand(syncCmd)
 }

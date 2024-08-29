@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package cmd
+package spicetify
 
 import (
 	"context"
@@ -17,6 +17,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Delusoire/bespoke-cli/v3/cmd/vars"
 	"github.com/Delusoire/bespoke-cli/v3/paths"
 	"github.com/charmbracelet/log"
 
@@ -31,14 +32,13 @@ import (
 var (
 	DaemonAddr    = "localhost:7967"
 	AllowedOrigin = "https://xpui.app.spotify.com"
-	daemon        bool
 )
 
 var daemonCmd = &cobra.Command{
 	Use:   "daemon",
 	Short: "Run daemon",
 	Run: func(cmd *cobra.Command, args []string) {
-		if daemon {
+		if vars.Daemon {
 			rootLogger.Info("Starting daemon")
 			startDaemon(rootLogger)
 		}
@@ -59,8 +59,8 @@ var daemonEnableCmd = &cobra.Command{
 	Short: "Enable daemon",
 	Run: func(cmd *cobra.Command, args []string) {
 		rootLogger.Info("Enabling daemon")
-		daemon = true
-		viper.Set("daemon", daemon)
+		vars.Daemon = true
+		viper.Set("daemon", vars.Daemon)
 		viper.WriteConfig()
 	},
 }
@@ -70,15 +70,13 @@ var daemonDisableCmd = &cobra.Command{
 	Short: "Disable daemon",
 	Run: func(cmd *cobra.Command, args []string) {
 		rootLogger.Info("Disabling daemon")
-		daemon = false
-		viper.Set("daemon", daemon)
+		vars.Daemon = false
+		viper.Set("daemon", vars.Daemon)
 		viper.WriteConfig()
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(daemonCmd)
-
 	daemonCmd.AddCommand(daemonStartCmd, daemonEnableCmd, daemonDisableCmd)
 }
 
@@ -91,7 +89,7 @@ func startDaemon(logger *log.Logger) {
 
 	startWatcher := func() {
 		watcherCtx, watcherCancel = context.WithCancel(context.Background())
-		go watchSpotifyApps(watcherCtx, spotifyDataPath, logger.WithPrefix("Watcher"))
+		go watchSpotifyApps(watcherCtx, vars.SpotifyDataPath, logger.WithPrefix("Watcher"))
 	}
 
 	viper.OnConfigChange(func(in fsnotify.Event) {
@@ -103,7 +101,7 @@ func startDaemon(logger *log.Logger) {
 		_spotifyExecPath := viper.GetString("spotify-exec-path")
 		_spotifyConfigPath := viper.GetString("spotify-config-path")
 
-		if _spotifyDataPath != spotifyDataPath {
+		if _spotifyDataPath != vars.SpotifyDataPath {
 			if watcherCancel != nil {
 				// TODO: wait for watcher to stop
 				watcherCancel()
@@ -111,13 +109,13 @@ func startDaemon(logger *log.Logger) {
 			restartWatcher = true
 		}
 
-		daemon = _daemon
-		mirror = _mirror
-		spotifyDataPath = _spotifyDataPath
-		spotifyExecPath = _spotifyExecPath
-		spotifyConfigPath = _spotifyConfigPath
+		vars.Daemon = _daemon
+		vars.Mirror = _mirror
+		vars.SpotifyDataPath = _spotifyDataPath
+		vars.SpotifyExecPath = _spotifyExecPath
+		vars.SpotifyConfigPath = _spotifyConfigPath
 
-		if !daemon {
+		if !vars.Daemon {
 			close(c)
 		}
 

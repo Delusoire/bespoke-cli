@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package cmd
+package spicetify
 
 import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/Delusoire/bespoke-cli/v3/cmd/vars"
 	"github.com/Delusoire/bespoke-cli/v3/paths"
 
 	"github.com/spf13/cobra"
@@ -29,12 +30,8 @@ func prepend[Type any](slice []Type, elems ...Type) []Type {
 func execRun(args []string) {
 	defaultArgs := []string{ /*"--disable-web-security",*/ }
 	args = prepend(args, defaultArgs...)
-	if mirror {
+	if vars.Mirror {
 		args = prepend(args, "--app-directory="+filepath.Join(paths.ConfigPath, "apps"))
 	}
-	exec.Command(spotifyExecPath, args...).Start()
-}
-
-func init() {
-	rootCmd.AddCommand(runCmd)
+	exec.Command(vars.SpotifyExecPath, args...).Start()
 }

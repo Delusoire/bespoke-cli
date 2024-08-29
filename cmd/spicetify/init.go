@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package cmd
+package spicetify
 
 import (
 	"fmt"
@@ -28,10 +28,6 @@ var initCmd = &cobra.Command{
 		}
 		rootLogger.Info("Initialized spicetify")
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(initCmd)
 }
 
 func execInit(logger *log.Logger) error {

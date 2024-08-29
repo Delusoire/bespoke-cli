@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package cmd
+package spicetify
 
 import (
 	"bytes"
@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Delusoire/bespoke-cli/v3/cmd/vars"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +27,7 @@ var devCmd = &cobra.Command{
 }
 
 func execDev() error {
-	offlineBnkPath := filepath.Join(spotifyConfigPath, "offline.bnk")
+	offlineBnkPath := filepath.Join(vars.SpotifyConfigPath, "offline.bnk")
 
 	file, err := os.OpenFile(offlineBnkPath, os.O_RDWR, 0644)
 	if err != nil {
@@ -46,8 +47,4 @@ func execDev() error {
 	}
 
 	return nil
-}
-
-func init() {
-	rootCmd.AddCommand(devCmd)
 }

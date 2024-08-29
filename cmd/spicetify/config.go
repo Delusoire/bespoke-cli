@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package cmd
+package spicetify
 
 import (
+	"github.com/Delusoire/bespoke-cli/v3/cmd/vars"
 	"github.com/Delusoire/bespoke-cli/v3/paths"
 
 	"github.com/spf13/cobra"
@@ -16,14 +17,10 @@ var configCmd = &cobra.Command{
 	Short: "Print spicetify config",
 	Run: func(cmd *cobra.Command, args []string) {
 		rootLogger.Infof("config file path: %s", paths.ConfigPath)
-		rootLogger.Infof("daemon: %t", daemon)
-		rootLogger.Infof("mirror: %t", mirror)
-		rootLogger.Infof("Spotify data path: %s", spotifyDataPath)
-		rootLogger.Infof("Spotify exec path: %s", spotifyExecPath)
-		rootLogger.Infof("Spotify config path: %s", spotifyConfigPath)
+		rootLogger.Infof("daemon: %t", vars.Daemon)
+		rootLogger.Infof("mirror: %t", vars.Mirror)
+		rootLogger.Infof("Spotify data path: %s", vars.SpotifyDataPath)
+		rootLogger.Infof("Spotify exec path: %s", vars.SpotifyExecPath)
+		rootLogger.Infof("Spotify config path: %s", vars.SpotifyConfigPath)
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(configCmd)
 }

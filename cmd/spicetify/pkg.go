@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package cmd
+package spicetify
 
 import (
 	"github.com/Delusoire/bespoke-cli/v3/module"
@@ -78,7 +78,5 @@ var pkgEnableCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(pkgCmd)
-
 	pkgCmd.AddCommand(pkgInstallCmd, pkgDeleteCmd, pkgEnableCmd)
 }

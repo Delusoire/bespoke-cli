@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package cmd
+package spicetify
 
 import (
 	"net/url"
@@ -127,10 +127,6 @@ func hp(action string, arguments url.Values) error {
 
 	}
 	return e.ErrUnsupportedOperation
-}
-
-func init() {
-	rootCmd.AddCommand(protocolCmd)
 }
 
 func open(url string) error {
