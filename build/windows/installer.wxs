@@ -47,7 +47,7 @@
 		<!-- Registry & Environment Settings -->
 		<DirectoryRef Id="BinDir">
 			<Component Id="Component_Files" Guid="{8e24c2f7-85f7-4db1-8277-85bdc0d2d686}">
-				<File Id="SpicetifyExe" Source=".\bin\spicetify.exe" />
+				<File Id="SpicetifyExe" Source=".\bin\spicetify.exe" KeyPath="yes" />
 				<File Id="StDaemonXml" Source=".\bin\st-daemon.xml" />
 			</Component>
 		</DirectoryRef>
@@ -75,6 +75,11 @@
 			<ComponentRef Id="Component_Environment" />
 		</Feature>
 
+
+		<CustomAction Id="CreateSpotifyShortcut" Directory="INSTALLDIR" Execute="deferred"
+			Impersonate="yes" Return="check"
+			ExeCommand='mklink "[INSTALLDIR]bin\spotify.exe" "[#SpicetifyExe]"' />
+
 		<CustomAction Id="InitSpicetify" Directory="INSTALLDIR" Execute="deferred"
 			Impersonate="yes" Return="check"
 			ExeCommand='"[#SpicetifyExe]" init' />
@@ -98,6 +103,7 @@
 		<!-- Update the environment -->
 		<InstallExecuteSequence>
 			<Custom Action="SetApplicationRootDirectory" Before="InstallFinalize" />
+			<Custom Action="CreateSpotifyShortcut" After="InstallFiles" Condition="NOT Installed" />
 			<Custom Action="InitSpicetify" After="InstallFiles" Condition="NOT Installed" />
 			<Custom Action="CreateScheduledTask" After="InitSpicetify" Condition="NOT Installed" />
 			<Custom Action="ChangeScheduledTask" After="CreateScheduledTask" Condition="NOT Installed" />
