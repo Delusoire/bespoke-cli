@@ -13,5 +13,6 @@ import (
 var rootLogger = vars.RootLogger
 
 func AddCommands(c *cobra.Command) {
+	c.AddCommand(runCmd)
 	c.AddCommand(updateCmd)
 }

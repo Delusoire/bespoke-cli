@@ -189,11 +189,12 @@ function Add-BinToPath {
 	process {
 		$user = [EnvironmentVariableTarget]::User
 		$path = [Environment]::GetEnvironmentVariable('PATH', $user)
-		if ($path -notlike "*$spicetifyBinaryPath*") {
+		$pathArray = $path -split ';'
+		if ($pathArray -notcontains $spicetifyBinaryPath) {
 			$path = "$path;$spicetifyBinaryPath"
+			[Environment]::SetEnvironmentVariable('PATH', $path, $user)
+			$env:PATH = $path
 		}
-		[Environment]::SetEnvironmentVariable('PATH', $path, $user)
-		$env:PATH = $path
 	}
 	end {
 		Write-Ok
@@ -263,6 +264,7 @@ function Install-Binary {
 			Invoke-WebRequest -Uri "https://github.com/$cliOwnerRepo/releases/download/$targetVersion/bespoke-cli-$v-windows-$architecture.exe" -UseBasicParsing -OutFile $spicetifyExecutablePath
 			Write-Ok
 		}
+		New-Item -ItemType SymbolicLink -Path "$spicetifyBinaryPath\spotify.exe" -Target $spicetifyExecutablePath
 	}
 	end {
 		Add-BinToPath

@@ -21,6 +21,5 @@ func AddCommands(c *cobra.Command) {
 	c.AddCommand(initCmd)
 	c.AddCommand(pkgCmd)
 	c.AddCommand(protocolCmd)
-	c.AddCommand(runCmd)
 	c.AddCommand(syncCmd)
 }
