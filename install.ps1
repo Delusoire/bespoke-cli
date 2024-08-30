@@ -301,7 +301,7 @@ function Initialize-Daemon {
 
 			$task = New-ScheduledTask -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Description $description
 
-			Register-ScheduledTask -TaskName $name -InputObject $task
+			Register-ScheduledTask -TaskName $name -InputObject $task -Force
 		}
 	}
 	process {
