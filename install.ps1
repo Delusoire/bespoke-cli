@@ -103,7 +103,7 @@ function Test-PowerShellVersion {
 	[CmdletBinding()]
 	param ()
 	begin {
-		$PSMinVersion = [version]'5.1'
+		$PSMinVersion = [version]'7.0' # [version]'5.1'
 	}
 	process {
 		Write-Host -Object 'Checking if your PowerShell version is compatible...' -NoNewline
@@ -387,10 +387,11 @@ function Install-Hooks {
 #region Checks
 if (-not (Test-PowerShellVersion)) {
 	Write-Error
-	Write-Warning -Message 'PowerShell 5.1 or higher is required to run this script'
-	Write-Warning -Message "You are running PowerShell $($PSVersionTable.PSVersion)"
-	Write-Host -Object 'PowerShell 5.1 install guide:'
-	Write-Host -Object 'https://learn.microsoft.com/skypeforbusiness/set-up-your-computer-for-windows-powershell/download-and-install-windows-powershell-5-1'
+	# Write-Warning -Message 'PowerShell 5.1 or higher is required to run this script'
+	# Write-Warning -Message "You are running PowerShell $($PSVersionTable.PSVersion)"
+	# Write-Host -Object 'PowerShell 5.1 install guide:'
+	# Write-Host -Object 'https://learn.microsoft.com/skypeforbusiness/set-up-your-computer-for-windows-powershell/download-and-install-windows-powershell-5-1'
+	Write-Warning -Message 'PowerShell 7 or higher is required to run this script'
 	Write-Host -Object 'PowerShell 7 install guide:'
 	Write-Host -Object 'https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-windows'
 	Pause
