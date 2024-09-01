@@ -86,7 +86,7 @@ func patchFile(path string, patch func(string) string) error {
 func patchIndexHtml(destXpuiPath string, logger *log.Logger) error {
 	logger.Info("Patching xpui/index.html")
 	return patchFile(filepath.Join(destXpuiPath, "index.html"), func(s string) string {
-		return strings.Replace(s, `<script defer="defer" src="/vendor~xpui.js"></script><script defer="defer" src="/xpui.js"></script>`, `<script type="module" src="/hooks/index.js"></script>`, 1)
+		return strings.Replace(s, `<script defer="defer" src="/vendor~xpui.js"></script><script defer="defer" src="/xpui.js"></script>`, `<script type="module" src="./hooks/index.js"></script>`, 1)
 	})
 }
 
