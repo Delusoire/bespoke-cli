@@ -49,7 +49,7 @@ func GetPlatformSpotifyExecPath(spotifyDataPath string) string {
 }
 
 func GetPlatformSpotifyConfigPath() (string, error) {
-	pref := filepath.Join(xdg.ConfigHome, "spotify")
+	pref := filepath.Join(xdg.CacheHome, "spotify")
 
 	if EnsurePath(pref) {
 		return pref, nil
